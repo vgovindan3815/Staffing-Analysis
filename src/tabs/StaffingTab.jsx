@@ -20,7 +20,7 @@ const REINVENT = {
     onPct: 9, offPct: 91,
     blendedLCR: 33.57, costToServe: 43.64,
     levels: {
-      "Accenture Leadership":    { on: 21.05, off: 0.85 },
+      "Leadership":    { on: 21.05, off: 0.85 },
       "5-Associate Director":    { on: 0,     off: 0    },
       "6-Senior Manager":        { on: 52.63, off: 3.00 },
       "7-Manager":               { on: 26.32, off: 6.00 },
@@ -35,7 +35,7 @@ const REINVENT = {
     onPct: 18, offPct: 82,
     blendedLCR: 46.91, costToServe: 60.99,
     levels: {
-      "Accenture Leadership":    { on: 9,  off: 0.85 },
+      "Leadership":    { on: 9,  off: 0.85 },
       "5-Associate Director":    { on: 0,  off: 0    },
       "6-Senior Manager":        { on: 45, off: 3.00 },
       "7-Manager":               { on: 45, off: 6.00 },
@@ -50,7 +50,7 @@ const REINVENT = {
     onPct: 25, offPct: 75,
     blendedLCR: 54.34, costToServe: 70.64,
     levels: {
-      "Accenture Leadership":    { on: 12, off: 0.85 },
+      "Leadership":    { on: 12, off: 0.85 },
       "5-Associate Director":    { on: 0,  off: 0    },
       "6-Senior Manager":        { on: 29, off: 3.00 },
       "7-Manager":               { on: 29, off: 6.00 },

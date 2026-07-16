@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 const DAYS_PER_PERSON = 320;
 
 export const LEVEL_ORDER = [
-  "Accenture Leadership",
+  "Leadership",
   "5-Associate Director",
   "6-Senior Manager",
   "7-Manager",
@@ -27,9 +27,13 @@ const COLS = {
 };
 
 function normaliseGroup(g) {
-  // lowercase variants from the sheet
   if (g === "data portfolio") return "Data Portfolio";
   return g;
+}
+
+function normaliseLevelBand(band) {
+  if (band === "Accenture Leadership") return "Leadership";
+  return band;
 }
 
 export function parseStaffingModel(wb) {
@@ -60,7 +64,7 @@ export function parseStaffingModel(wb) {
     const podName      = String(row[COLS.pod]          ?? "").trim().replace(/\s+/g, " ");
     const location     = String(row[COLS.location]     ?? "").trim();
     const enterpriseId = String(row[COLS.enterpriseId] ?? "").trim();
-    const levelBand    = String(row[COLS.levelBand]    ?? "").trim();
+    const levelBand    = normaliseLevelBand(String(row[COLS.levelBand] ?? "").trim());
     const billCode     = row[COLS.billCode]  != null ? parseFloat(row[COLS.billCode])  : null;
     const lcr          = row[COLS.lcr]       != null ? parseFloat(row[COLS.lcr])       : null;
     const rate         = lcr ?? billCode; // prefer LCR (col 17); fall back to bill code (col 16)
@@ -230,7 +234,7 @@ export function parseStaffingModel(wb) {
       location: String(row[COLS.location] ?? "").trim(),
       name:     row[COLS.name]         ? String(row[COLS.name]).trim()         : null,
       eid:      row[COLS.enterpriseId] ? String(row[COLS.enterpriseId]).trim() : null,
-      level:    String(row[COLS.levelBand] ?? "").trim(),
+      level:    normaliseLevelBand(String(row[COLS.levelBand] ?? "").trim()),
       billCode: row[COLS.lcr] != null ? parseFloat(row[COLS.lcr]) : (row[COLS.billCode] != null ? parseFloat(row[COLS.billCode]) : null),
       cost: row[COLS.cost] != null ? parseFloat(row[COLS.cost]) : null,
       months,

@@ -14,7 +14,7 @@ export const TRACK_COL = {
   "PCF - OpenShift":      "#0E7490",
 };
 export const LEVEL_COL = {
-  "Accenture Leadership":   "#5E35B1",
+  "Leadership":   "#5E35B1",
   "5-Associate Director":   "#7C3AED",
   "6-Senior Manager":       "#1565C0",
   "7-Manager":              "#185FA5",
