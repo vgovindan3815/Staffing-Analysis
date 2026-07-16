@@ -253,6 +253,20 @@ export default function App() {
           liveDetail={liveDetail}
         />
       </div>
+
+      {/* Footer — privacy notice */}
+      <div style={{
+        borderTop: "1px solid #E8E8E8",
+        background: "#FFFFFF",
+        padding: "12px 28px",
+        display: "flex", alignItems: "center", gap: 8,
+        fontSize: 11, color: "#888888",
+      }}>
+        <i className="ti ti-shield-lock" style={{ fontSize: 13, color: "#A100FF", flexShrink: 0 }} />
+        <span>
+          <strong style={{ color: "#555555" }}>Privacy notice:</strong> Uploaded files are processed locally in your browser only. No data leaves your device or is stored by this application. Note: if you are using a private or incognito window, the file will not be remembered after you close or refresh the tab.
+        </span>
+      </div>
     </div>
   );
 }
