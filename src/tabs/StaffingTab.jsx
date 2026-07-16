@@ -1,14 +1,12 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { s, fmtN, pct } from "../styles.js";
 import { TEAL, LEVEL_COL, GROUP_COL } from "../data/hardcoded.js";
 import { STAFFING_DETAIL } from "../data/staffingDetail.js";
-import { formatSavedAt } from "../storage/fileStore.js";
 import Kpi      from "../components/Kpi.jsx";
 import BarRow   from "../components/BarRow.jsx";
 import SplitBar from "../components/SplitBar.jsx";
 import PricingTab from "./PricingTab.jsx";
 import HomeTab from "./HomeTab.jsx";
-import HomeSidebar from "../components/HomeSidebar.jsx";
 import HelpTab from "./HelpTab.jsx";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 
@@ -628,102 +626,14 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
   );
 }
 
-export default function StaffingTab({ staffing, isLive, loading, storedName, storedDate, onStaffingUpload, liveDetail, monthLabels }) {
-  const [view, setView]     = useState("home");
-  const [dragOver, setDragOver] = useState(false);
+export default function StaffingTab({ view, setView, staffing, isLive, loading, storedName, storedDate, liveDetail, monthLabels, margin, setMargin }) {
   const [detail, setDetail] = useState(null);
-  const [margin, setMargin] = useState(23);
-  const [sidebarWidth, setSidebarWidth] = useState(280);
-  const fileInputRef = useRef(null);
-  const resizing = useRef(false);
-  const startX   = useRef(0);
-  const startW   = useRef(0);
-
-  const startResize = (e) => {
-    resizing.current = true;
-    startX.current = e.clientX;
-    startW.current = sidebarWidth;
-    document.addEventListener("mousemove", onResize);
-    document.addEventListener("mouseup", stopResize);
-  };
-  const onResize = (e) => {
-    if (!resizing.current) return;
-    const delta = e.clientX - startX.current;
-    setSidebarWidth(Math.min(480, Math.max(200, startW.current + delta)));
-  };
-  const stopResize = () => {
-    resizing.current = false;
-    document.removeEventListener("mousemove", onResize);
-    document.removeEventListener("mouseup", stopResize);
-  };
-
-  function handleDrop(e) {
-    e.preventDefault(); setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && onStaffingUpload) onStaffingUpload(file);
-  }
-  function handleFileInput(e) {
-    const file = e.target.files?.[0];
-    if (file && onStaffingUpload) onStaffingUpload(file);
-    e.target.value = "";
-  }
 
   const DAYS      = staffing.daysPerPerson ?? 320;
   const total     = staffing.total;
   const named     = staffing.named ?? total;
   const totalDays = staffing.totalDays ?? total * DAYS;
   const offshore  = (staffing.india ?? 0) + (staffing.argentina ?? 0);
-
-  const costs = computeCosts(liveDetail);
-
-  const subTabs = [
-    { id:"home",     label:"Home" },
-    { id:"groups",   label:"By project" },
-    { id:"levels",   label:"By level" },
-    { id:"pods",     label:"By pod" },
-    { id:"pricing",  label:"Pricing" },
-    { id:"reinvent", label:"Reinvent compliance" },
-    { id:"help",     label:"Help" },
-  ];
-
-  // Upload strip — always shown
-  const UploadStrip = (
-    <div
-      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
-      onClick={() => fileInputRef.current?.click()}
-      style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 14px", borderRadius:8, cursor:"pointer", border:`0.5px dashed ${dragOver ? TEAL : "var(--color-border-tertiary)"}`, background: dragOver ? "var(--color-background-info)" : "var(--color-background-secondary)", fontSize:12, color:"var(--color-text-secondary)", transition:"border-color 0.15s, background 0.15s", flexShrink:0 }}
-    >
-      <i className="ti ti-file-upload" style={{ fontSize:16, color: TEAL }} />
-      <span>
-        {loading
-          ? "Refreshing resources…"
-          : isLive
-            ? <>Resources loaded from <strong style={{ color:"var(--color-text-primary)" }}>{storedName}</strong>{storedDate ? ` · ${formatSavedAt(storedDate)}` : ""} — drop a new staffing file here to refresh</>
-            : "Drop the Staffing Models file here (or click) to load live resource data — only this tab will refresh"
-        }
-      </span>
-      <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }} onChange={handleFileInput} />
-    </div>
-  );
-
-  // Tab bar
-  const TabBar = (
-    <div style={{ display:"flex", gap:0, background:"#FFFFFF", borderBottom:"1px solid #E8E8E8", padding:"0 4px", flexShrink:0 }}>
-      {subTabs.map(t => (
-        <button key={t.id} onClick={() => { setView(t.id); setDetail(null); }} style={{
-          padding:"12px 16px", fontSize:12, border:"none", background:"none",
-          borderBottom: view===t.id ? "2px solid #A100FF" : "2px solid transparent",
-          color: view===t.id ? "#A100FF" : "#777777",
-          fontWeight: view===t.id ? 700 : 500,
-          cursor:"pointer", letterSpacing:0.1, transition:"color 0.15s, border-color 0.15s",
-        }}>
-          {t.label}
-        </button>
-      ))}
-    </div>
-  );
 
   // Content for non-home views
   const NonHomeContent = detail !== null ? (
@@ -952,30 +862,11 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
   );
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-      {UploadStrip}
-
+    <div style={{ padding: "20px 24px", flex: 1 }}>
       {view === "home" && detail === null ? (
-        <div style={{ display:"flex", flex:1, overflow:"hidden", height:"calc(100vh - 180px)", minHeight:500 }}>
-          {/* Purple sidebar */}
-          <div style={{ width: sidebarWidth, minWidth:200, maxWidth:480, flexShrink:0, overflow:"hidden" }}>
-            <HomeSidebar staffing={staffing} costs={costs} margin={margin} setMargin={setMargin} />
-          </div>
-          {/* Drag handle */}
-          <div onMouseDown={startResize} style={{ width:4, cursor:"col-resize", background:"rgba(161,0,255,0.15)", flexShrink:0 }} />
-          {/* Right content */}
-          <div style={{ flex:1, overflow:"auto", display:"flex", flexDirection:"column" }}>
-            {TabBar}
-            <HomeTab staffing={staffing} liveDetail={liveDetail} monthLabels={monthLabels} />
-          </div>
-        </div>
+        <HomeTab staffing={staffing} liveDetail={liveDetail} monthLabels={monthLabels} />
       ) : (
-        <div style={{ display:"flex", flexDirection:"column", flex:1 }}>
-          {TabBar}
-          <div style={{ flex:1, overflow:"auto", padding:"20px 24px" }}>
-            {NonHomeContent}
-          </div>
-        </div>
+        NonHomeContent
       )}
     </div>
   );

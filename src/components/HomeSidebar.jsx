@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const SIDEBAR_BG   = "#0D0020";
 const SECTION_BG   = "rgba(161,0,255,0.07)";
@@ -59,8 +59,10 @@ function Row({ label, value, color, indent }) {
   );
 }
 
-export default function HomeSidebar({ staffing, costs, margin, setMargin }) {
+export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive, storedName, storedDate, onUpload, onReset }) {
   const [expanded, setExpanded] = useState(new Set(["resources"]));
+  const [dragOver, setDragOver] = useState(false);
+  const fileRef = useRef(null);
 
   const toggle = (id) => {
     setExpanded(prev => {
@@ -69,6 +71,12 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin }) {
       else next.add(id);
       return next;
     });
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault(); setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) onUpload(file);
   };
 
   const total    = staffing.total ?? 0;
@@ -91,8 +99,65 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin }) {
       overflowY: "auto",
       height: "100%",
     }}>
+
+      {/* Upload zone */}
+      {!isLive ? (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => fileRef.current?.click()}
+          style={{
+            margin: "14px 12px 4px",
+            height: 192,
+            border: `1.5px dashed ${dragOver ? "#A100FF" : "rgba(161,0,255,0.35)"}`,
+            borderRadius: 12,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", gap: 10,
+            background: dragOver ? "rgba(161,0,255,0.18)" : "rgba(161,0,255,0.07)",
+            transition: "all 0.15s",
+            flexShrink: 0,
+          }}
+        >
+          <i className="ti ti-file-spreadsheet" style={{ fontSize: 32, color: "#A100FF" }} />
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", textAlign: "center", lineHeight: 1.5 }}>
+            Drop Excel file<br />or click to browse
+          </div>
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
+            .xlsx · .xls
+          </div>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }} />
+        </div>
+      ) : (
+        <div style={{ margin: "14px 12px 4px", padding: "14px", background: "rgba(161,0,255,0.1)", border: "1px solid rgba(161,0,255,0.25)", borderRadius: 12, flexShrink: 0 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.7, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Active file</div>
+          <div style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 600, wordBreak: "break-all", lineHeight: 1.4, marginBottom: 10 }}>{storedName}</div>
+          {storedDate && (
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>
+              Saved {new Date(storedDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => fileRef.current?.click()}
+              style={{ flex: 1, fontSize: 11, fontWeight: 600, padding: "6px 0", background: "rgba(161,0,255,0.2)", border: "1px solid rgba(161,0,255,0.4)", borderRadius: 6, color: "#C084FC", cursor: "pointer" }}>
+              Replace
+            </button>
+            <button onClick={onReset}
+              style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 0", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
+              Clear
+            </button>
+          </div>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }} />
+        </div>
+      )}
+
+      {/* Divider */}
+      <div style={{ height: 1, background: BORDER_COL, margin: "8px 0 0" }} />
+
       {/* Header */}
-      <div style={{ padding: "20px 18px 14px", borderBottom: `1px solid ${BORDER_COL}` }}>
+      <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${BORDER_COL}` }}>
         <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: ACCENT }}>Dashboard</div>
         <div style={{ fontSize: 13, color: TEXT_SUB, marginTop: 4 }}>Click a section to expand</div>
       </div>
