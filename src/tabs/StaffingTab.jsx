@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { s, fmtN, pct } from "../styles.js";
 import { TEAL, LEVEL_COL, GROUP_COL } from "../data/hardcoded.js";
 import { STAFFING_DETAIL } from "../data/staffingDetail.js";
-import Kpi      from "../components/Kpi.jsx";
-import BarRow   from "../components/BarRow.jsx";
-import SplitBar from "../components/SplitBar.jsx";
+import Kpi        from "../components/Kpi.jsx";
+import BarRow     from "../components/BarRow.jsx";
+import SplitBar   from "../components/SplitBar.jsx";
+import MultiSelect from "../components/MultiSelect.jsx";
 import PricingTab from "./PricingTab.jsx";
 import HomeTab from "./HomeTab.jsx";
 import HelpTab from "./HelpTab.jsx";
@@ -627,10 +628,24 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
 }
 
 export default function StaffingTab({ view, setView, staffing, isLive, loading, storedName, storedDate, liveDetail, monthLabels, margin, setMargin }) {
-  const [detail, setDetail] = useState(null);
+  const [detail, setDetail]           = useState(null);
+  const [groupFilter, setGroupFilter] = useState(new Set());
+  const [podFilter,   setPodFilter]   = useState(new Set());
 
-  // Reset drill-down when the user switches top-level tabs
-  useEffect(() => { setDetail(null); }, [view]);
+  // Reset drill-down and filters when the user switches top-level tabs
+  useEffect(() => {
+    setDetail(null);
+    setGroupFilter(new Set());
+    setPodFilter(new Set());
+  }, [view]);
+
+  const visibleGroups = groupFilter.size === 0
+    ? staffing.groups
+    : staffing.groups.filter(g => groupFilter.has(g.name));
+
+  const visiblePods = podFilter.size === 0
+    ? staffing.pods
+    : staffing.pods.filter(p => podFilter.has(p.name));
 
   const DAYS      = staffing.daysPerPerson ?? 320;
   const total     = staffing.total;
@@ -652,62 +667,79 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
   ) : (
     <>
       {view === "groups" && (
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
-          <div style={s.card}>
-            <table style={s.tbl}>
-              <thead>
-                <tr>
-                  {["Role group","People","US","India","Staffed days","% of total","Onshore %"].map((h,i) => (
-                    <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}) }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {staffing.groups.map(g => {
-                  const gDays = g.totalDays ?? g.people * DAYS;
-                  const realLevels = staffing.byGroupLevel?.[g.name];
-                  const levels = realLevels?.length > 0
-                    ? realLevels
-                    : synthesiseLevels(g, staffing.levels, staffing.us, staffing.india ?? 0, staffing.argentina ?? 0, DAYS);
-                  const hasDetail = levels.length > 0;
-                  return (
-                    <tr key={g.name}
-                      onClick={() => { if (hasDetail) setDetail({ name: g.name, type:"group", levels }); }}
-                      style={{ cursor: hasDetail ? "pointer" : "default" }}>
-                      <td style={s.td}>
-                        <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:GROUP_COL[g.name]||TEAL, marginRight:8, verticalAlign:1 }} />
-                        {g.name}
-                      </td>
-                      <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{g.people}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{g.us}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{g.india}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(gDays))}</td>
-                      <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(gDays, totalDays)}</td>
-                      <td style={{ ...s.td, ...s.tdR, color: g.us/g.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
-                        {Math.round(g.us/g.people*100)}%
-                      </td>
-                    </tr>
-                  );
-                })}
-                <tr style={{ background:"var(--color-background-secondary)" }}>
-                  <td style={{ ...s.td, fontWeight:500 }}>Total</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.groups.reduce((a,g)=>a+g.people,0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.groups.reduce((a,g)=>a+g.us,0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.groups.reduce((a,g)=>a+(g.india??0),0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{fmtN(Math.round(totalDays))}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>100%</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(staffing.us/total*100)}%</td>
-                </tr>
-              </tbody>
-            </table>
+        <>
+          {/* Filter toolbar */}
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+            <MultiSelect
+              options={staffing.groups.map(g => g.name)}
+              selected={groupFilter}
+              onChange={setGroupFilter}
+              placeholder="All projects"
+              label="project"
+            />
+            {groupFilter.size > 0 && (
+              <span style={{ fontSize:12, color:"#888" }}>
+                Showing {visibleGroups.length} of {staffing.groups.length} projects
+              </span>
+            )}
           </div>
-          <div style={{ ...s.card, padding:14 }}>
-            <div style={s.sectionHdr}>Group size ranking</div>
-            {staffing.groups.map(g => (
-              <BarRow key={g.name} label={g.name.slice(0,22)} value={g.people} max={staffing.groups[0].people} color={GROUP_COL[g.name]||TEAL} right={`${g.people}p`} sub={pct(g.people,total)} />
-            ))}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
+            <div style={s.card}>
+              <table style={s.tbl}>
+                <thead>
+                  <tr>
+                    {["Role group","People","US","India","Staffed days","% of total","Onshore %"].map((h,i) => (
+                      <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}) }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleGroups.map(g => {
+                    const gDays = g.totalDays ?? g.people * DAYS;
+                    const realLevels = staffing.byGroupLevel?.[g.name];
+                    const levels = realLevels?.length > 0
+                      ? realLevels
+                      : synthesiseLevels(g, staffing.levels, staffing.us, staffing.india ?? 0, staffing.argentina ?? 0, DAYS);
+                    const hasDetail = levels.length > 0;
+                    return (
+                      <tr key={g.name}
+                        onClick={() => { if (hasDetail) setDetail({ name: g.name, type:"group", levels }); }}
+                        style={{ cursor: hasDetail ? "pointer" : "default" }}>
+                        <td style={s.td}>
+                          <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:GROUP_COL[g.name]||TEAL, marginRight:8, verticalAlign:1 }} />
+                          {g.name}
+                        </td>
+                        <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{g.people}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{g.us}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{g.india}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(gDays))}</td>
+                        <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(gDays, totalDays)}</td>
+                        <td style={{ ...s.td, ...s.tdR, color: g.us/g.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
+                          {Math.round(g.us/g.people*100)}%
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background:"var(--color-background-secondary)" }}>
+                    <td style={{ ...s.td, fontWeight:500 }}>Total</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+g.people,0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+g.us,0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+(g.india??0),0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{fmtN(Math.round(visibleGroups.reduce((a,g)=>a+(g.totalDays??g.people*DAYS),0)))}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{groupFilter.size === 0 ? "100%" : pct(visibleGroups.reduce((a,g)=>a+(g.totalDays??g.people*DAYS),0), totalDays)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(visibleGroups.reduce((a,g)=>a+g.us,0)/Math.max(1,visibleGroups.reduce((a,g)=>a+g.people,0))*100)}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{ ...s.card, padding:14 }}>
+              <div style={s.sectionHdr}>Group size ranking</div>
+              {visibleGroups.map(g => (
+                <BarRow key={g.name} label={g.name.slice(0,22)} value={g.people} max={visibleGroups[0]?.people ?? 1} color={GROUP_COL[g.name]||TEAL} right={`${g.people}p`} sub={pct(g.people,total)} />
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {view === "levels" && (() => {
@@ -792,62 +824,79 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
       })()}
 
       {view === "pods" && (
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
-          <div style={s.card}>
-            <table style={s.tbl}>
-              <thead>
-                <tr>
-                  {["Pod name","People","US","India","Staffed days","% of total","Onshore %"].map((h,i) => (
-                    <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}) }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {staffing.pods.map(p => {
-                  const pDays = p.totalDays ?? p.people * DAYS;
-                  const realLevels = staffing.byPodLevel?.[p.name];
-                  const levels = realLevels?.length > 0
-                    ? realLevels
-                    : synthesiseLevels(p, staffing.levels, staffing.us, staffing.india ?? 0, staffing.argentina ?? 0, DAYS);
-                  const hasDetail = levels.length > 0;
-                  return (
-                    <tr key={p.name}
-                      onClick={() => { if (hasDetail) setDetail({ name: p.name, type:"pod", levels }); }}
-                      style={{ cursor: hasDetail ? "pointer" : "default" }}>
-                      <td style={s.td}>
-                        <span style={{ fontSize:10, background:"var(--color-background-secondary)", color:"var(--color-text-secondary)", padding:"1px 6px", borderRadius:4, marginRight:6 }}>{p.group.slice(0,12)}</span>
-                        {p.name}
-                      </td>
-                      <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{p.people}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{p.us}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{p.india}</td>
-                      <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(pDays))}</td>
-                      <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(pDays, totalDays)}</td>
-                      <td style={{ ...s.td, ...s.tdR, color: p.us/p.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
-                        {Math.round(p.us/p.people*100)}%
-                      </td>
-                    </tr>
-                  );
-                })}
-                <tr style={{ background:"var(--color-background-secondary)" }}>
-                  <td style={{ ...s.td, fontWeight:500 }}>Total</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.pods.reduce((a,p)=>a+p.people,0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.pods.reduce((a,p)=>a+p.us,0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{staffing.pods.reduce((a,p)=>a+p.india,0)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{fmtN(Math.round(totalDays))}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>—</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(staffing.us/total*100)}%</td>
-                </tr>
-              </tbody>
-            </table>
+        <>
+          {/* Filter toolbar */}
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+            <MultiSelect
+              options={staffing.pods.map(p => p.name)}
+              selected={podFilter}
+              onChange={setPodFilter}
+              placeholder="All pods"
+              label="pod"
+            />
+            {podFilter.size > 0 && (
+              <span style={{ fontSize:12, color:"#888" }}>
+                Showing {visiblePods.length} of {staffing.pods.length} pods
+              </span>
+            )}
           </div>
-          <div style={{ ...s.card, padding:14 }}>
-            <div style={s.sectionHdr}>Pod size ranking</div>
-            {staffing.pods.slice(0,10).map(p => (
-              <BarRow key={p.name} label={p.name.slice(0,28)} value={p.people} max={staffing.pods[0].people} color={GROUP_COL[p.group]||TEAL} right={`${p.people}p`} sub={pct(p.people,total)} />
-            ))}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
+            <div style={s.card}>
+              <table style={s.tbl}>
+                <thead>
+                  <tr>
+                    {["Pod name","People","US","India","Staffed days","% of total","Onshore %"].map((h,i) => (
+                      <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}) }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visiblePods.map(p => {
+                    const pDays = p.totalDays ?? p.people * DAYS;
+                    const realLevels = staffing.byPodLevel?.[p.name];
+                    const levels = realLevels?.length > 0
+                      ? realLevels
+                      : synthesiseLevels(p, staffing.levels, staffing.us, staffing.india ?? 0, staffing.argentina ?? 0, DAYS);
+                    const hasDetail = levels.length > 0;
+                    return (
+                      <tr key={p.name}
+                        onClick={() => { if (hasDetail) setDetail({ name: p.name, type:"pod", levels }); }}
+                        style={{ cursor: hasDetail ? "pointer" : "default" }}>
+                        <td style={s.td}>
+                          <span style={{ fontSize:10, background:"var(--color-background-secondary)", color:"var(--color-text-secondary)", padding:"1px 6px", borderRadius:4, marginRight:6 }}>{p.group.slice(0,12)}</span>
+                          {p.name}
+                        </td>
+                        <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{p.people}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{p.us}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{p.india}</td>
+                        <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(pDays))}</td>
+                        <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(pDays, totalDays)}</td>
+                        <td style={{ ...s.td, ...s.tdR, color: p.us/p.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
+                          {Math.round(p.us/p.people*100)}%
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background:"var(--color-background-secondary)" }}>
+                    <td style={{ ...s.td, fontWeight:500 }}>Total</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visiblePods.reduce((a,p)=>a+p.people,0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visiblePods.reduce((a,p)=>a+p.us,0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visiblePods.reduce((a,p)=>a+p.india,0)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{fmtN(Math.round(visiblePods.reduce((a,p)=>a+(p.totalDays??p.people*DAYS),0)))}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>—</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(visiblePods.reduce((a,p)=>a+p.us,0)/Math.max(1,visiblePods.reduce((a,p)=>a+p.people,0))*100)}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{ ...s.card, padding:14 }}>
+              <div style={s.sectionHdr}>Pod size ranking</div>
+              {visiblePods.slice(0,10).map(p => (
+                <BarRow key={p.name} label={p.name.slice(0,28)} value={p.people} max={visiblePods[0]?.people ?? 1} color={GROUP_COL[p.group]||TEAL} right={`${p.people}p`} sub={pct(p.people,total)} />
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {view === "pricing" && (
