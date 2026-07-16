@@ -7,7 +7,7 @@ import {
 const US_COL  = "#2563EB";   // bright blue — onshore
 const OFF_COL = "#F97316";   // orange — offshore India
 const AR_COL  = "#8B5CF6";   // purple — Argentina
-const PRP_COL = "#A100FF";   // Accenture purple — totals
+const PRP_COL = "#A100FF";   // brand purple — totals
 
 const MONTH_LABELS = ["M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12","M13","M14","M15","M16"];
 

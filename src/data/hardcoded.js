@@ -143,7 +143,7 @@ export const PORTFOLIOS = [
       { name:"PCF - OpenShift",      apps:16, days:42,  cost:0.0712 },
     ]}},
     { label:"Replace", apps:1, rows:[
-      { disp:"Replace (New App-High)", apps:1, epApp:58, stf:86.83, oh:19.32, rate:RATE_REPL, note:"Delivered by Deloitte · Accenture coordinates" },
+      { disp:"Replace (New App-High)", apps:1, epApp:58, stf:86.83, oh:19.32, rate:RATE_REPL, note:"Delivered by third party · coordination included" },
     ], plat:{ total_days:28, total_cost:0.0197, tracks:[
       { name:"Kafka / JMS",          apps:1, days:17, cost:0.0129 },
       { name:"DevOps - Jenkins/GHA", apps:1, days:19, cost:0.0166 },

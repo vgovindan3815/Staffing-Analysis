@@ -1,12 +1,12 @@
 import { RATE_RNR, RATE_REPL, RATE_CBR } from "./pricing.js";
 
 // Map Cost Per EAI disposition labels → App Master / Solution Book labels
-// null = no match (e.g. Replace — Deloitte is Accenture-external)
+// null = no match (e.g. Replace rows delivered by a third party)
 // Pattern-based canonical lookup — handles annotated Back Office labels like
 // "R&R — Standard  (119 apps + Tririga reallocation)" and
 // "Replace (New App-High) — Tririga  ·  Delivered by Deloitte  (1 app)"
 function getCanonical(disp) {
-  // Any row mentioning "Deloitte" → Accenture delivers nothing
+  // Any row mentioning "Deloitte" → delivered externally, no internal cost
   if (disp.includes("Deloitte")) return null;
 
   if (disp.startsWith("R&R — Standard")   || disp.startsWith("R&R - Standard"))   return "Remediate and Retain";
@@ -77,7 +77,7 @@ export function mergeData(costData, amData, sbData, sfData) {
           if (sbEpApp != null) epApp = sbEpApp;
         }
 
-        // Deloitte rows: keep Accenture pricing (CTA includes coordination cost)
+        // Deloitte rows: retain pricing as coordination cost is included in CTA
         return { ...disp, apps, epApp, rate: getRate(disp.disp) };
       });
 
