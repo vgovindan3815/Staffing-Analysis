@@ -17,7 +17,7 @@ export const LEVEL_ORDER = [
 
 const HEADER_ALIASES = {
   program:      ["program", "programme", "program name", "programme name"],
-  project:      ["project", "project (e)", "project(e)", "role group", "rolegroup", "group", "project group", "project name", "work group"],
+  project:      ["project", "projects", "project (e)", "project(e)", "role group", "rolegroup", "group", "project group", "project name", "work group"],
   pod:          ["pod name", "pod", "team", "team name", "squad"],
   role:         ["project role", "role", "skill profile", "project role / skill profile", "job title", "title"],
   location:     ["location", "loc", "country", "site"],
@@ -96,6 +96,15 @@ export function parseStaffingModel(wb) {
   }
   // Sort by column index
   monthCols.sort((a, b) => a.col - b.col);
+
+  // Fallback: if no month columns detected by name, infer from position (between fte and totalDays)
+  if (monthCols.length === 0 && colMap.fte != null && colMap.totalDays != null && colMap.totalDays > colMap.fte + 1) {
+    for (let ci = colMap.fte + 1; ci < colMap.totalDays; ci++) {
+      const raw2 = headerRow[ci];
+      const label = raw2 != null ? String(raw2).trim() : `M${ci - colMap.fte}`;
+      monthCols.push({ col: ci, label: label || `M${ci - colMap.fte}` });
+    }
+  }
 
   const dataRows = raw.slice(2);
 

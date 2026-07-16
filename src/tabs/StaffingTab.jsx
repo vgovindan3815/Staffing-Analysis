@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { s, fmtN, pct } from "../styles.js";
 import { TEAL, LEVEL_COL, GROUP_COL } from "../data/hardcoded.js";
 import { STAFFING_DETAIL } from "../data/staffingDetail.js";
@@ -628,6 +628,9 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
 
 export default function StaffingTab({ view, setView, staffing, isLive, loading, storedName, storedDate, liveDetail, monthLabels, margin, setMargin }) {
   const [detail, setDetail] = useState(null);
+
+  // Reset drill-down when the user switches top-level tabs
+  useEffect(() => { setDetail(null); }, [view]);
 
   const DAYS      = staffing.daysPerPerson ?? 320;
   const total     = staffing.total;

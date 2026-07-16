@@ -121,7 +121,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
         >
           <i className="ti ti-file-spreadsheet" style={{ fontSize: 32, color: "#A100FF" }} />
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", textAlign: "center", lineHeight: 1.5 }}>
-            Drop Excel file<br />or click to browse
+            Drag and drop<br />or click to upload
           </div>
           <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
             .xlsx · .xls
@@ -197,7 +197,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
         id="cost"
         icon="💰"
         title="Programme Cost"
-        summary={costs ? fmtCost(costs.totalCost) : "Upload file"}
+        summary={costs ? fmtCost(costs.totalCost) : "—"}
         expanded={expanded.has("cost")}
         onToggle={toggle}
       >
@@ -233,8 +233,8 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
             </div>
           </>
         ) : (
-          <div style={{ fontSize: 12, color: TEXT_SUB, textAlign: "center", padding: "12px 0" }}>
-            Upload your staffing file<br />to see cost figures
+          <div style={{ fontSize: 12, color: TEXT_SUB, padding: "4px 0 8px" }}>
+            Upload a staffing file to view cost breakdown and pricing.
           </div>
         )}
       </SidebarSection>
