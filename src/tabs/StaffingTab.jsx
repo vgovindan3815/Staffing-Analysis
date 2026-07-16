@@ -8,6 +8,8 @@ import BarRow   from "../components/BarRow.jsx";
 import SplitBar from "../components/SplitBar.jsx";
 import PricingTab from "./PricingTab.jsx";
 import HomeTab from "./HomeTab.jsx";
+import HomeSidebar from "../components/HomeSidebar.jsx";
+import HelpTab from "./HelpTab.jsx";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 
 const US_COL  = "#185FA5";
@@ -110,6 +112,24 @@ function computeDerivedLCR(staffing) {
   return { onLCR, offLCR, blended };
 }
 
+function isOnshore(loc) {
+  const u = (loc ?? "").toUpperCase();
+  return u === "USA" || u === "US" || u.startsWith("UNITED STATES") || u === "ONSHORE";
+}
+
+function computeCosts(detail) {
+  if (!detail?.length) return null;
+  let onCost = 0, offCost = 0, hasData = false;
+  for (const r of detail) {
+    if (r.billCode == null || !r.totalDays) continue;
+    hasData = true;
+    const hrs = isOnshore(r.location) ? 8 : 9;
+    const cost = r.billCode * r.totalDays * hrs;
+    if (isOnshore(r.location)) onCost += cost; else offCost += cost;
+  }
+  return hasData ? { onCost, offCost, totalCost: onCost + offCost } : null;
+}
+
 function ReinventSection({ staffing }) {
   const [touch, setTouch] = useState("MT");
 
@@ -122,23 +142,19 @@ function ReinventSection({ staffing }) {
   const actualOnPct  = total > 0 ? onCount  / total * 100 : 0;
   const actualOffPct = total > 0 ? offCount / total * 100 : 0;
 
-  // Level distribution within onshore / offshore
   const onLevels  = staffing.levels.filter(l => (l.us ?? 0) > 0);
   const offLevels = staffing.levels.filter(l => ((l.india ?? 0) + (l.ar ?? 0)) > 0);
   const levelOnPct  = l => onCount  > 0 ? (l.us ?? 0) / onCount  * 100 : 0;
   const levelOffPct = l => offCount > 0 ? ((l.india ?? 0) + (l.ar ?? 0)) / offCount * 100 : 0;
   const allBands = Object.keys(guide.levels);
 
-  // Economics — auto-derived from level bill rates
   const { onLCR: parsedOnLCR, offLCR: parsedOffLCR, blended: actualBlendedLCR } = computeDerivedLCR(staffing);
 
   const locGap = actualOnPct - guide.onPct;
 
-  // Target pool sizes — how many people *should* be onshore/offshore at guide ratio
   const targetOnCount  = Math.round(total * guide.onPct  / 100);
   const targetOffCount = Math.round(total * guide.offPct / 100);
 
-  // Normalized % = actual headcount / target pool size — removes location-mix distortion
   const normOnPct  = l => targetOnCount  > 0 ? (l.us ?? 0) / targetOnCount  * 100 : 0;
   const normOffPct = l => targetOffCount > 0 ? ((l.india ?? 0) + (l.ar ?? 0)) / targetOffCount * 100 : 0;
 
@@ -218,7 +234,6 @@ function ReinventSection({ staffing }) {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      {/* Touch type selector */}
       <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
         <span style={{ fontSize:13, color:"#444444" }}>Reinvent model:</span>
         <div style={{ display:"flex", gap:4 }}>
@@ -237,11 +252,8 @@ function ReinventSection({ staffing }) {
         </span>
       </div>
 
-      {/* Location mix */}
       <div style={{ ...s.card, padding:"12px 16px" }}>
         <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--color-text-secondary)", marginBottom:10 }}>Location mix</div>
-
-        {/* Pool summary strip */}
         <div style={{ display:"grid", gridTemplateColumns:"80px 1fr 1fr 1fr 1fr", gap:10, marginBottom:12, alignItems:"center" }}>
           <div style={{ background:"var(--color-background-secondary)", borderRadius:6, padding:"8px 12px", gridRow:"1", textAlign:"center" }}>
             <div style={{ fontSize:10, color:"var(--color-text-tertiary)", marginBottom:2 }}>Total</div>
@@ -253,7 +265,7 @@ function ReinventSection({ staffing }) {
             { label:"Onshore target",  count:targetOnCount,  pct:guide.onPct,  color:US_COL,  sub:`at ${guide.onPct}%`, faded:true },
             { label:"Offshore target", count:targetOffCount, pct:guide.offPct, color:OFF_COL, sub:`at ${guide.offPct}%`, faded:true },
           ].map(({label, count, pct: pctVal, color, sub, faded}) => (
-            <div key={label} style={{ background: faded ? "var(--color-background-secondary)" : "var(--color-background-secondary)", borderRadius:6, padding:"8px 12px", border: faded ? "0.5px dashed var(--color-border-tertiary)" : "0.5px solid var(--color-border-tertiary)" }}>
+            <div key={label} style={{ background: "var(--color-background-secondary)", borderRadius:6, padding:"8px 12px", border: faded ? "0.5px dashed var(--color-border-tertiary)" : "0.5px solid var(--color-border-tertiary)" }}>
               <div style={{ fontSize:10, color:"var(--color-text-tertiary)", marginBottom:2 }}>{label}</div>
               <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
                 <span style={{ fontSize:16, fontWeight:700, color: faded ? "var(--color-text-secondary)" : color }}>{pctVal.toFixed(0)}%</span>
@@ -274,7 +286,6 @@ function ReinventSection({ staffing }) {
         </div>
       </div>
 
-      {/* Level distribution — side by side */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
         <LevelTable title="Onshore (US) — level mix" color={US_COL}
           levels={onLevels} actualPctFn={levelOnPct} normPctFn={normOnPct} guideKey="on" />
@@ -282,7 +293,6 @@ function ReinventSection({ staffing }) {
           levels={offLevels} actualPctFn={levelOffPct} normPctFn={normOffPct} guideKey="off" />
       </div>
 
-      {/* Level mix comparison chart */}
       <div style={{ ...s.card, padding:14 }}>
         <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--color-text-secondary)", marginBottom:4 }}>Level mix — normalised vs target</div>
         <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:10 }}>
@@ -316,14 +326,12 @@ function ReinventSection({ staffing }) {
         </ResponsiveContainer>
       </div>
 
-      {/* Economics — auto-derived from level bill rates */}
       <div style={{ ...s.card, padding:"16px 20px" }}>
         <div style={{ fontSize:13, fontWeight:700, letterSpacing:0.4, textTransform:"uppercase",
           color:"#444444", marginBottom:16, paddingBottom:10, borderBottom:"1px solid #EBEBEB" }}>
           Economics
         </div>
 
-        {/* Derived LCR summary tiles */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:20 }}>
           {[
             { label:"Onshore blended LCR", value:parsedOnLCR, sub:"derived from level mix" },
@@ -343,13 +351,13 @@ function ReinventSection({ staffing }) {
           ))}
         </div>
 
-        {/* Working */}
         <div style={{ background:"#F5F5F5", borderRadius:6, padding:"12px 16px",
           fontFamily:"var(--font-mono)", fontSize:12, lineHeight:2.0, marginBottom:16,
           border:"1px solid #E0E0E0" }}>
           <div style={{ color:"#888888" }}>Blended LCR = (onshore% × onshore LCR) + (offshore% × offshore LCR)</div>
           <div>= ({actualOnPct.toFixed(1)}% × ${parsedOnLCR.toFixed(2)}) + ({actualOffPct.toFixed(1)}% × ${parsedOffLCR.toFixed(2)})</div>
-          <div>= ${(actualOnPct/100*parsedOnLCR).toFixed(2)} + ${(actualOffPct/100*parsedOffLCR).toFixed(2)}</div>
+          <div>= ${(actualOnPct/100*parsedOnLCR).toFixed(2)} + ${(actualOffPct/100*parsedOffLCR).toFixed(2)}
+          </div>
           <div style={{ borderTop:"1px solid #E0E0E0", marginTop:6, paddingTop:6, fontWeight:700 }}>
             = ${actualBlendedLCR.toFixed(2)}/hr
           </div>
@@ -361,9 +369,6 @@ function ReinventSection({ staffing }) {
   );
 }
 
-// Synthesise per-group or per-pod level breakdown when byGroupLevel / byPodLevel
-// is not populated (hardcoded mode). Distributes the overall level mix proportionally
-// using each entity's onshore / offshore share of the total pool.
 function synthesiseLevels(entity, allLevels, totUs, totIndia, totAr, DAYS) {
   const frOn  = totUs    > 0 ? (entity.us    ?? 0) / totUs    : 0;
   const frOff = totIndia > 0 ? (entity.india ?? 0) / totIndia : 0;
@@ -392,7 +397,6 @@ const dot = (color) => ({
   background:color, marginRight:4, verticalAlign:1,
 });
 
-// ── Person-level drill-down (Level 3) ────────────────────────────────────────
 const MONTH_LABELS = ["M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12","M13","M14","M15","M16"];
 const LOC_COL = { USA: US_COL, India: OFF_COL, Argentina: "#B45309" };
 
@@ -413,7 +417,6 @@ function PersonDetailView({ entityType, entityName, levelBand, liveDetail, onBac
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-      {/* Breadcrumb */}
       <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"var(--color-text-secondary)" }}>
         <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--color-text-secondary)", fontSize:12, padding:0, display:"flex", alignItems:"center", gap:3 }}>
           <i className="ti ti-arrow-left" style={{ fontSize:13 }} />
@@ -495,7 +498,6 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
   const onshoreLevels  = levels.filter(l => (l.us ?? 0) > 0);
   const offshoreLevels = levels.filter(l => ((l.india ?? 0) + (l.ar ?? 0)) > 0);
 
-  // Total days for this group/pod only (not programme total)
   const groupTotalDays = levels.reduce((a, l) => a + (l.totalDays ?? l.people * DAYS), 0);
 
   const usDays  = l => (l.totalDays ?? l.people * DAYS) * ((l.us ?? 0) / l.people);
@@ -584,7 +586,6 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
         </button>
         <div style={{ fontSize:15, fontWeight:600, marginTop:4 }}>{detail.name}</div>
       </div>
-      {/* Subheader summary */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10 }}>
         <div style={{ ...s.card, padding:"10px 14px" }}>
           <div style={{ fontSize:11, color:"var(--color-text-secondary)", marginBottom:2 }}>Total resources</div>
@@ -627,12 +628,34 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
   );
 }
 
-export default function StaffingTab({ staffing, isLive, loading, storedName, storedDate, onStaffingUpload, liveDetail }) {
+export default function StaffingTab({ staffing, isLive, loading, storedName, storedDate, onStaffingUpload, liveDetail, monthLabels }) {
   const [view, setView]     = useState("home");
   const [dragOver, setDragOver] = useState(false);
   const [detail, setDetail] = useState(null);
   const [margin, setMargin] = useState(23);
+  const [sidebarWidth, setSidebarWidth] = useState(280);
   const fileInputRef = useRef(null);
+  const resizing = useRef(false);
+  const startX   = useRef(0);
+  const startW   = useRef(0);
+
+  const startResize = (e) => {
+    resizing.current = true;
+    startX.current = e.clientX;
+    startW.current = sidebarWidth;
+    document.addEventListener("mousemove", onResize);
+    document.addEventListener("mouseup", stopResize);
+  };
+  const onResize = (e) => {
+    if (!resizing.current) return;
+    const delta = e.clientX - startX.current;
+    setSidebarWidth(Math.min(480, Math.max(200, startW.current + delta)));
+  };
+  const stopResize = () => {
+    resizing.current = false;
+    document.removeEventListener("mousemove", onResize);
+    document.removeEventListener("mouseup", stopResize);
+  };
 
   function handleDrop(e) {
     e.preventDefault(); setDragOver(false);
@@ -651,6 +674,8 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
   const totalDays = staffing.totalDays ?? total * DAYS;
   const offshore  = (staffing.india ?? 0) + (staffing.argentina ?? 0);
 
+  const costs = computeCosts(liveDetail);
+
   const subTabs = [
     { id:"home",     label:"Home" },
     { id:"groups",   label:"By project" },
@@ -658,70 +683,61 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
     { id:"pods",     label:"By pod" },
     { id:"pricing",  label:"Pricing" },
     { id:"reinvent", label:"Reinvent compliance" },
+    { id:"help",     label:"Help" },
   ];
 
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ ...s.kpiGrid, gridTemplateColumns:"repeat(5,1fr)" }}>
-        <Kpi label="Total resources"   value={fmtN(total)}                                      sub={`${staffing.us} US · ${offshore} offshore`} accent />
-        <Kpi label="Named resources"   value={fmtN(named)}                                      sub="Enterprise ID ≠ TBD" />
-        <Kpi label="Onshore %"         value={Math.round(staffing.us / total * 100) + "%"}      sub={`${staffing.us} US resources`} />
-        <Kpi label="Offshore %"        value={Math.round(offshore / total * 100) + "%"}         sub={`${staffing.india ?? 0} IN · ${staffing.argentina ?? 0} AR`} />
-        <Kpi label="Total staffed days" value={fmtN(Math.round(totalDays)) + "d"}              sub={`${total} resources`} />
-      </div>
+  // Upload strip — always shown
+  const UploadStrip = (
+    <div
+      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+      onClick={() => fileInputRef.current?.click()}
+      style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 14px", borderRadius:8, cursor:"pointer", border:`0.5px dashed ${dragOver ? TEAL : "var(--color-border-tertiary)"}`, background: dragOver ? "var(--color-background-info)" : "var(--color-background-secondary)", fontSize:12, color:"var(--color-text-secondary)", transition:"border-color 0.15s, background 0.15s", flexShrink:0 }}
+    >
+      <i className="ti ti-file-upload" style={{ fontSize:16, color: TEAL }} />
+      <span>
+        {loading
+          ? "Refreshing resources…"
+          : isLive
+            ? <>Resources loaded from <strong style={{ color:"var(--color-text-primary)" }}>{storedName}</strong>{storedDate ? ` · ${formatSavedAt(storedDate)}` : ""} — drop a new staffing file here to refresh</>
+            : "Drop the Staffing Models file here (or click) to load live resource data — only this tab will refresh"
+        }
+      </span>
+      <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }} onChange={handleFileInput} />
+    </div>
+  );
 
-      {/* Staffing-only upload strip */}
-      <div
-        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 14px", borderRadius:8, cursor:"pointer", border:`0.5px dashed ${dragOver ? TEAL : "var(--color-border-tertiary)"}`, background: dragOver ? "var(--color-background-info)" : "var(--color-background-secondary)", fontSize:12, color:"var(--color-text-secondary)", transition:"border-color 0.15s, background 0.15s" }}
-      >
-        <i className="ti ti-file-upload" style={{ fontSize:16, color: TEAL }} />
-        <span>
-          {loading
-            ? "Refreshing resources…"
-            : isLive
-              ? <>Resources loaded from <strong style={{ color:"var(--color-text-primary)" }}>{storedName}</strong>{storedDate ? ` · ${formatSavedAt(storedDate)}` : ""} — drop a new staffing file here to refresh</>
-              : "Drop the Staffing Models file here (or click) to load live resource data — only this tab will refresh"
-          }
-        </span>
-        <input ref={fileInputRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }} onChange={handleFileInput} />
-      </div>
+  // Tab bar
+  const TabBar = (
+    <div style={{ display:"flex", gap:0, background:"#FFFFFF", borderBottom:"1px solid #E8E8E8", padding:"0 4px", flexShrink:0 }}>
+      {subTabs.map(t => (
+        <button key={t.id} onClick={() => { setView(t.id); setDetail(null); }} style={{
+          padding:"12px 16px", fontSize:12, border:"none", background:"none",
+          borderBottom: view===t.id ? "2px solid #A100FF" : "2px solid transparent",
+          color: view===t.id ? "#A100FF" : "#777777",
+          fontWeight: view===t.id ? 700 : 500,
+          cursor:"pointer", letterSpacing:0.1, transition:"color 0.15s, border-color 0.15s",
+        }}>
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
 
-      <div style={{ display:"flex", gap:0, background:"#FFFFFF", borderRadius:10, border:"1px solid #E8E8E8", padding:"0 4px", marginBottom:4 }}>
-        {subTabs.map(t => (
-          <button key={t.id} onClick={() => { setView(t.id); setDetail(null); }} style={{
-            padding:"12px 16px", fontSize:12, border:"none", background:"none",
-            borderBottom: view===t.id ? "2px solid #A100FF" : "2px solid transparent",
-            color: view===t.id ? "#A100FF" : "#777777",
-            fontWeight: view===t.id ? 700 : 500,
-            cursor:"pointer", letterSpacing:0.1, transition:"color 0.15s, border-color 0.15s",
-          }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {detail !== null ? (
-        <DetailLevelView
-          detail={detail}
-          totalDays={totalDays}
-          total={total}
-          onBack={() => setDetail(null)}
-          DAYS={DAYS}
-          offshore={offshore}
-          liveDetail={liveDetail}
-        />
-      ) : (<>
-
-      {/* HOME */}
-      {view === "home" && (
-        <HomeTab staffing={staffing} liveDetail={liveDetail} margin={margin} setMargin={setMargin} />
-      )}
-
-      {/* BY ROLE GROUP */}
+  // Content for non-home views
+  const NonHomeContent = detail !== null ? (
+    <DetailLevelView
+      detail={detail}
+      totalDays={totalDays}
+      total={total}
+      onBack={() => setDetail(null)}
+      DAYS={DAYS}
+      offshore={offshore}
+      liveDetail={liveDetail}
+    />
+  ) : (
+    <>
       {view === "groups" && (
         <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
           <div style={s.card}>
@@ -781,7 +797,6 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
         </div>
       )}
 
-      {/* BY LEVEL — grouped by onshore / offshore */}
       {view === "levels" && (() => {
         const onshoreTotal  = staffing.us;
         const offshoreTotal = offshore;
@@ -824,9 +839,7 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
                 <tr style={{ background:"var(--color-background-secondary)" }}>
                   <td style={{ ...s.td, fontWeight:500 }}>Subtotal</td>
                   <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{sectionPeople}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>
-                    100%
-                  </td>
+                  <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>100%</td>
                   <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>
                     {totalDays > 0 ? (rows.reduce((a,l)=>a+daysFn(l),0)/totalDays*100).toFixed(1)+"%" : "—"}
                   </td>
@@ -836,8 +849,8 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
           </div>
         );
 
-        const usDays     = l => (l.totalDays ?? l.people * DAYS) * ((l.us ?? 0) / l.people);
-        const offDays    = l => (l.totalDays ?? l.people * DAYS) * (((l.india ?? 0) + (l.ar ?? 0)) / l.people);
+        const usDays  = l => (l.totalDays ?? l.people * DAYS) * ((l.us ?? 0) / l.people);
+        const offDays = l => (l.totalDays ?? l.people * DAYS) * (((l.india ?? 0) + (l.ar ?? 0)) / l.people);
 
         return (
           <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
@@ -865,10 +878,8 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
         );
       })()}
 
-      {/* BY POD */}
       {view === "pods" && (
         <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
-
           <div style={s.card}>
             <table style={s.tbl}>
               <thead>
@@ -933,7 +944,39 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
       {view === "reinvent" && (
         <ReinventSection staffing={staffing} />
       )}
-      </>)}
+
+      {view === "help" && (
+        <HelpTab />
+      )}
+    </>
+  );
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+      {UploadStrip}
+
+      {view === "home" && detail === null ? (
+        <div style={{ display:"flex", flex:1, overflow:"hidden", height:"calc(100vh - 180px)", minHeight:500 }}>
+          {/* Purple sidebar */}
+          <div style={{ width: sidebarWidth, minWidth:200, maxWidth:480, flexShrink:0, overflow:"hidden" }}>
+            <HomeSidebar staffing={staffing} costs={costs} margin={margin} setMargin={setMargin} />
+          </div>
+          {/* Drag handle */}
+          <div onMouseDown={startResize} style={{ width:4, cursor:"col-resize", background:"rgba(161,0,255,0.15)", flexShrink:0 }} />
+          {/* Right content */}
+          <div style={{ flex:1, overflow:"auto", display:"flex", flexDirection:"column" }}>
+            {TabBar}
+            <HomeTab staffing={staffing} liveDetail={liveDetail} monthLabels={monthLabels} />
+          </div>
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", flex:1 }}>
+          {TabBar}
+          <div style={{ flex:1, overflow:"auto", padding:"20px 24px" }}>
+            {NonHomeContent}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

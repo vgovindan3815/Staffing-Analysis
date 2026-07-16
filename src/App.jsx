@@ -5,6 +5,7 @@ import { parseStaffingModel } from "./parsers/parseStaffingModel.js";
 import { toStaffingShape } from "./compute/mergeData.js";
 import { saveFile, loadFile, deleteFile, storedToFile } from "./storage/fileStore.js";
 import StaffingTab from "./tabs/StaffingTab.jsx";
+import Chatbot from "./components/Chatbot.jsx";
 
 const STORAGE_KEY = "staffing-v1";
 
@@ -13,7 +14,7 @@ async function parseFile(file) {
   const wb     = XLSX.read(buf, { type: "array" });
   const parsed = parseStaffingModel(wb);
   const shaped = toStaffingShape(parsed);
-  return { staffing: shaped, detail: parsed.detail };
+  return { staffing: shaped, detail: parsed.detail, monthLabels: parsed.monthLabels };
 }
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
   const [storedName, setStoredName]   = useState(null);
   const [storedDate, setStoredDate]   = useState(null);
   const [dragOver, setDragOver]       = useState(false);
+  const [monthLabels, setMonthLabels] = useState([]);
   const fileInputRef                  = useRef(null);
 
   // On mount: try to restore previously uploaded file from IndexedDB
@@ -33,6 +35,7 @@ export default function App() {
         const file = storedToFile(record);
         const data = await parseFile(file);
         setParsed(data);
+        setMonthLabels(data.monthLabels ?? []);
         setIsLive(true);
         setStoredName(record.name);
         setStoredDate(record.savedAt);
@@ -48,6 +51,7 @@ export default function App() {
       const data = await parseFile(file);
       await saveFile(STORAGE_KEY, file);
       setParsed(data);
+      setMonthLabels(data.monthLabels ?? []);
       setIsLive(true);
       setStoredName(file.name);
       setStoredDate(Date.now());
@@ -251,8 +255,11 @@ export default function App() {
           storedDate={storedDate}
           onStaffingUpload={handleUpload}
           liveDetail={liveDetail}
+          monthLabels={monthLabels}
         />
       </div>
+
+      <Chatbot />
 
       {/* Footer — privacy notice */}
       <div style={{

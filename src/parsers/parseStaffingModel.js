@@ -15,16 +15,23 @@ export const LEVEL_ORDER = [
   "subk",
 ];
 
-// Staffing Plan sheet (FXF_Staffing_Plan V1_Consolidated_TSA_exit+Day2):
-// Row 0 = programme title, row 1 = column headers, data from row 2
-// 0=Program, 1=SolutionType, 3=RoleGroup, 5=PodName, 8=ProjectRole
-// 12=Location, 13=Name, 14=EnterpriseID, 15=LevelBand, 16=BillCode
-// 19=TotalFTE, 20-35=M1-M16(Jun-Sep), 36=TotalDays
-const COLS = {
-  program: 0, roleGroup: 3, project: 4, pod: 5, role: 8,
-  location: 12, name: 13, enterpriseId: 14,
-  levelBand: 15, billCode: 16, lcr: 17, fte: 19, totalDays: 36, cost: 37,
+const HEADER_ALIASES = {
+  program:      ["program"],
+  project:      ["project"],
+  pod:          ["pod name", "pod"],
+  role:         ["project role", "role", "skill profile", "project role / skill profile"],
+  location:     ["location"],
+  name:         ["name", "resource name"],
+  enterpriseId: ["enterprise id", "enterprise_id", "eid", "enterpriseid"],
+  levelBand:    ["level band", "levelband", "level", "band", "grade"],
+  billCode:     ["bill code", "billcode", "billing code"],
+  lcr:          ["lcr", "labour cost rate", "labor cost rate", "lcr rate"],
+  fte:          ["total fte", "fte", "totalfte"],
+  totalDays:    ["total days", "totaldays", "staffed days"],
+  cost:         ["cost", "total cost"],
 };
+
+const REQUIRED_FIELDS = ["project", "location", "levelBand", "lcr", "fte", "totalDays"];
 
 function normaliseGroup(g) {
   if (g === "data portfolio") return "Data Portfolio";
@@ -49,6 +56,43 @@ export function parseStaffingModel(wb) {
 
   // Row 0 = programme title header; row 1 = column headers; data starts row 2
   const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+
+  // Build colMap by scanning row 1 (header row) case-insensitively
+  const headerRow = raw[1] ?? [];
+  const colMap = {};
+  for (const [field, aliases] of Object.entries(HEADER_ALIASES)) {
+    for (let ci = 0; ci < headerRow.length; ci++) {
+      const cell = String(headerRow[ci] ?? "").trim().toLowerCase();
+      if (aliases.includes(cell)) {
+        colMap[field] = ci;
+        break;
+      }
+    }
+  }
+
+  // Check required fields
+  const missing = REQUIRED_FIELDS.filter(f => colMap[f] == null);
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required columns: ${missing.join(", ")}.\n` +
+      `Please check that your Excel file has a 'Staffing Plan' sheet with the correct column headers.\n` +
+      `See the Help tab for the full list of required and optional column names.`
+    );
+  }
+
+  // Detect month columns by regex
+  const MONTH_RE_NUM   = /^m\d{1,2}$/i;
+  const MONTH_RE_NAMED = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[-\s\/]?\d{2,4}$/i;
+  const monthCols = [];
+  for (let ci = 0; ci < headerRow.length; ci++) {
+    const cell = String(headerRow[ci] ?? "").trim();
+    if (MONTH_RE_NUM.test(cell) || MONTH_RE_NAMED.test(cell)) {
+      monthCols.push({ col: ci, label: cell });
+    }
+  }
+  // Sort by column index
+  monthCols.sort((a, b) => a.col - b.col);
+
   const dataRows = raw.slice(2);
 
   const podMap        = {};
@@ -60,30 +104,26 @@ export function parseStaffingModel(wb) {
   let totalPeople = 0, totalUs = 0, totalIndia = 0, totalAr = 0, totalDaysSum = 0, namedCount = 0;
 
   for (const row of dataRows) {
-    const roleGroup    = String(row[COLS.project] ?? "").trim();
-    const podName      = String(row[COLS.pod]          ?? "").trim().replace(/\s+/g, " ");
-    const location     = String(row[COLS.location]     ?? "").trim();
-    const enterpriseId = String(row[COLS.enterpriseId] ?? "").trim();
-    const levelBand    = normaliseLevelBand(String(row[COLS.levelBand] ?? "").trim());
-    const billCode     = row[COLS.billCode]  != null ? parseFloat(row[COLS.billCode])  : null;
-    const lcr          = row[COLS.lcr]       != null ? parseFloat(row[COLS.lcr])       : null;
-    const rate         = lcr ?? billCode; // prefer LCR (col 17); fall back to bill code (col 16)
-    const totalFte     = row[COLS.fte]       != null ? parseFloat(row[COLS.fte])       : 0;
-    const totalDaysCol = row[COLS.totalDays] != null ? parseFloat(row[COLS.totalDays]) : null;
+    const roleGroup    = String(row[colMap.project] ?? "").trim();
+    const podName      = String(row[colMap.pod]          ?? "").trim().replace(/\s+/g, " ");
+    const location     = String(row[colMap.location]     ?? "").trim();
+    const enterpriseId = String(row[colMap.enterpriseId] ?? "").trim();
+    const levelBand    = normaliseLevelBand(String(row[colMap.levelBand] ?? "").trim());
+    const billCode     = row[colMap.billCode]  != null ? parseFloat(row[colMap.billCode])  : null;
+    const lcr          = row[colMap.lcr]       != null ? parseFloat(row[colMap.lcr])       : null;
+    const rate         = lcr ?? billCode; // prefer LCR; fall back to bill code
+    const totalFte     = row[colMap.fte]       != null ? parseFloat(row[colMap.fte])       : 0;
+    const totalDaysCol = row[colMap.totalDays] != null ? parseFloat(row[colMap.totalDays]) : null;
 
-    // Each row = 1 person/role. col[fte] = sum of monthly FTE fractions.
-    // Exclude blank rows and zero-allocation rows.
     if (!roleGroup && !podName) continue;
     if (totalFte <= 0) continue;
 
-    const people = 1;  // one row = one person
+    const people = 1;
     const days   = (totalDaysCol != null && totalDaysCol > 0) ? totalDaysCol : DAYS_PER_PERSON;
 
-    // Location classification — explicit matches to avoid false positives
     const loc   = location.toUpperCase();
     const isUs  = loc === "USA" || loc === "US" || loc.startsWith("UNITED STATES") || loc === "ONSHORE";
     const isAr  = loc.startsWith("ARGENTINA") || loc === "AR";
-    // Canada, Brazil, Malaysia, Costa Rica, Philippines → treated as offshore (India bucket)
     const isIndia = !isUs && !isAr;
 
     totalPeople    += people;
@@ -105,7 +145,7 @@ export function parseStaffingModel(wb) {
       pod.india     += isIndia ? people : 0;
       pod.ar        += isAr    ? people : 0;
       pod.totalDays += people * days;
-      if (!pod.group && roleGroup) pod.group = roleGroup; // project name as group label
+      if (!pod.group && roleGroup) pod.group = roleGroup;
     }
 
     // Level aggregation
@@ -184,7 +224,6 @@ export function parseStaffingModel(wb) {
     }
   }
 
-  // Derive per-location blended bill rates from accumulated cost/day sums
   function withBillRates(obj) {
     const billOn  = obj._onDays  > 0 ? obj._onCost  / obj._onDays  : null;
     const billOff = obj._offDays > 0 ? obj._offCost / obj._offDays : null;
@@ -192,7 +231,6 @@ export function parseStaffingModel(wb) {
     return { ...rest, billOn, billOff };
   }
 
-  // Round floats for display; sort level by canonical order
   const round = obj => ({ ...obj, people: Math.round(obj.people), us: Math.round(obj.us), india: Math.round(obj.india), ar: Math.round(obj.ar) });
 
   const byPod = Object.values(podMap).map(round).sort((a, b) => b.people - a.people);
@@ -220,25 +258,24 @@ export function parseStaffingModel(wb) {
   // Extract individual rows for person-level drill-down
   const detail = [];
   for (const row of dataRows) {
-    const roleGroup = String(row[COLS.project] ?? "").trim();
+    const roleGroup = String(row[colMap.project] ?? "").trim();
     if (!roleGroup) continue;
-    const totalFte = row[COLS.fte] != null ? parseFloat(row[COLS.fte]) : 0;
+    const totalFte = row[colMap.fte] != null ? parseFloat(row[colMap.fte]) : 0;
     if (totalFte <= 0) continue;
-    const months = [];
-    for (let m = 20; m <= 35; m++) months.push(row[m] != null ? Math.round(Number(row[m]) * 100) / 100 : 0);
+    const months = monthCols.map(mc => row[mc.col] != null ? Math.round(Number(row[mc.col]) * 100) / 100 : 0);
     detail.push({
-      program:  String(row[COLS.program]  ?? "").trim(),
+      program:  String(row[colMap.program]      ?? "").trim(),
       group:    roleGroup,
-      pod:      String(row[COLS.pod]      ?? "").trim().replace(/\s+/g, " "),
-      role:     String(row[COLS.role]     ?? "").trim(),
-      location: String(row[COLS.location] ?? "").trim(),
-      name:     row[COLS.name]         ? String(row[COLS.name]).trim()         : null,
-      eid:      row[COLS.enterpriseId] ? String(row[COLS.enterpriseId]).trim() : null,
-      level:    normaliseLevelBand(String(row[COLS.levelBand] ?? "").trim()),
-      billCode: row[COLS.lcr] != null ? parseFloat(row[COLS.lcr]) : (row[COLS.billCode] != null ? parseFloat(row[COLS.billCode]) : null),
-      cost: row[COLS.cost] != null ? parseFloat(row[COLS.cost]) : null,
+      pod:      String(row[colMap.pod]          ?? "").trim().replace(/\s+/g, " "),
+      role:     String(row[colMap.role]         ?? "").trim(),
+      location: String(row[colMap.location]     ?? "").trim(),
+      name:     row[colMap.name]         ? String(row[colMap.name]).trim()         : null,
+      eid:      row[colMap.enterpriseId] ? String(row[colMap.enterpriseId]).trim() : null,
+      level:    normaliseLevelBand(String(row[colMap.levelBand] ?? "").trim()),
+      billCode: row[colMap.lcr] != null ? parseFloat(row[colMap.lcr]) : (row[colMap.billCode] != null ? parseFloat(row[colMap.billCode]) : null),
+      cost:     row[colMap.cost] != null ? parseFloat(row[colMap.cost]) : null,
       months,
-      totalDays: row[COLS.totalDays] != null ? Math.round(Number(row[COLS.totalDays]) * 100) / 100 : 0,
+      totalDays: row[colMap.totalDays] != null ? Math.round(Number(row[colMap.totalDays]) * 100) / 100 : 0,
     });
   }
 
@@ -250,5 +287,6 @@ export function parseStaffingModel(wb) {
     byGroupLevel,
     byPodLevel,
     detail,
+    monthLabels: monthCols.map(mc => mc.label),
   };
 }
