@@ -16,19 +16,19 @@ export const LEVEL_ORDER = [
 ];
 
 const HEADER_ALIASES = {
-  program:      ["program"],
-  project:      ["project"],
-  pod:          ["pod name", "pod"],
-  role:         ["project role", "role", "skill profile", "project role / skill profile"],
-  location:     ["location"],
-  name:         ["name", "resource name"],
-  enterpriseId: ["enterprise id", "enterprise_id", "eid", "enterpriseid"],
-  levelBand:    ["level band", "levelband", "level", "band", "grade"],
-  billCode:     ["bill code", "billcode", "billing code"],
-  lcr:          ["lcr", "labour cost rate", "labor cost rate", "lcr rate"],
-  fte:          ["total fte", "fte", "totalfte"],
-  totalDays:    ["total days", "totaldays", "staffed days"],
-  cost:         ["cost", "total cost"],
+  program:      ["program", "programme", "program name", "programme name"],
+  project:      ["project", "project (e)", "project(e)", "role group", "rolegroup", "group", "project group", "project name", "work group"],
+  pod:          ["pod name", "pod", "team", "team name", "squad"],
+  role:         ["project role", "role", "skill profile", "project role / skill profile", "job title", "title"],
+  location:     ["location", "loc", "country", "site"],
+  name:         ["name", "resource name", "full name", "employee name"],
+  enterpriseId: ["enterprise id", "enterprise_id", "eid", "enterpriseid", "employee id", "emp id", "id"],
+  levelBand:    ["level band", "levelband", "level", "band", "grade", "job level", "seniority"],
+  billCode:     ["bill code", "billcode", "billing code", "bill rate", "billing rate"],
+  lcr:          ["lcr", "labour cost rate", "labor cost rate", "lcr rate", "cost rate", "rate"],
+  fte:          ["total fte", "fte", "totalfte", "headcount", "hc"],
+  totalDays:    ["total days", "totaldays", "staffed days", "days", "total staffed days"],
+  cost:         ["cost", "total cost", "annual cost"],
 };
 
 const REQUIRED_FIELDS = ["project", "location", "levelBand", "lcr", "fte", "totalDays"];
@@ -73,10 +73,14 @@ export function parseStaffingModel(wb) {
   // Check required fields
   const missing = REQUIRED_FIELDS.filter(f => colMap[f] == null);
   if (missing.length > 0) {
+    const foundHeaders = headerRow
+      .map((h, i) => h != null ? `  Col ${String.fromCharCode(65 + i)}: "${String(h).trim()}"` : null)
+      .filter(Boolean)
+      .join("\n");
     throw new Error(
-      `Missing required columns: ${missing.join(", ")}.\n` +
-      `Please check that your Excel file has a 'Staffing Plan' sheet with the correct column headers.\n` +
-      `See the Help tab for the full list of required and optional column names.`
+      `Missing required columns: ${missing.join(", ")}.\n\n` +
+      `Headers found in your file (row 2):\n${foundHeaders}\n\n` +
+      `See the Help tab for accepted column names.`
     );
   }
 
