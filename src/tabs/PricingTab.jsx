@@ -5,7 +5,8 @@ import { STAFFING_DETAIL } from "../data/staffingDetail.js";
 
 const US_COL  = "#185FA5";
 const OFF_COL = "#009CA6";
-const HOURS   = 8; // hours per staffed day
+const ON_HRS  = 8;
+const OFF_HRS = 9;
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,8 +83,8 @@ function groupRowCost(groupLevels, billByBand, DAYS) {
   for (const l of groupLevels) {
     const { onBill, offBill } = billRates(l, billByBand);
     const { usDays, offDays: offD } = locSplit(l, DAYS);
-    onCost  += usDays * onBill * HOURS;
-    offCost += offD   * offBill * HOURS;
+    onCost  += usDays * onBill  * ON_HRS;
+    offCost += offD   * offBill * OFF_HRS;
     onDays  += usDays;
     offDays += offD;
   }
@@ -263,13 +264,14 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
       const { usDays, offDays } = locSplit(l, DAYS);
       return a + (locationKey === "us" ? usDays : offDays);
     }, 0);
+    const hrs = locationKey === "us" ? ON_HRS : OFF_HRS;
     const totCost = rows.reduce((a, l) => {
       const liveBill = computeLiveGroupLevelLCR(liveDetail, groupName, l.band, locationKey);
       const { onBill, offBill } = billRates(l, billByBand);
       const bill = liveBill ?? (locationKey === "us" ? onBill : offBill);
       const { usDays, offDays } = locSplit(l, DAYS);
       const days = locationKey === "us" ? usDays : offDays;
-      return a + days * bill * HOURS;
+      return a + days * bill * hrs;
     }, 0);
 
     return (
@@ -294,7 +296,7 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
               const { usDays, offDays } = locSplit(l, DAYS);
               const lPpl = locationKey === "us" ? (l.us ?? 0) : (l.india ?? 0) + (l.ar ?? 0);
               const days = locationKey === "us" ? usDays : offDays;
-              const cost = days * bill * HOURS;
+              const cost = days * bill * hrs;
               return (
                 <tr key={l.band} style={{ cursor:"pointer" }}
                   onClick={() => setPersonView({ band: l.band, locationKey })}
@@ -370,17 +372,37 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
   );
 }
 
+// Compute total cost per person from liveDetail (same formula as HomeTab).
+function computeCostsFromDetail(detail) {
+  if (!detail?.length) return null;
+  let onCost = 0, offCost = 0, hasData = false;
+  for (const r of detail) {
+    if (r.billCode == null || !r.totalDays) continue;
+    hasData = true;
+    const hrs = isOnshoreLocation(r.location) ? ON_HRS : OFF_HRS;
+    const cost = r.billCode * r.totalDays * hrs;
+    if (isOnshoreLocation(r.location)) onCost  += cost;
+    else                               offCost += cost;
+  }
+  if (!hasData) return null;
+  return { onCost, offCost, totalCost: onCost + offCost };
+}
+
 // ── Main PricingTab ───────────────────────────────────────────────────────────
 
-export default function PricingTab({ staffing, liveDetail }) {
-  const [margin, setMargin]   = useState(23);
-  const [drill,  setDrill]    = useState(null); // null | {type:"group",name,levels} | {type:"level",band,loc}
+export default function PricingTab({ staffing, liveDetail, margin, setMargin }) {
+  const [drill, setDrill] = useState(null); // null | {type:"group",name,levels} | {type:"level",band,loc}
 
   const DAYS      = staffing.daysPerPerson ?? 320;
   const billByBand = buildBillLookup(staffing.levels);
   const { onLCR, offLCR, blended, onCost: totOnCost, offCost: totOffCost, onDays: totOnDays, offDays: totOffDays }
     = computeBlendedLCR(staffing.levels, DAYS, billByBand);
-const totalCostAll = (totOnCost + totOffCost) * HOURS;
+  const liveCosts    = computeCostsFromDetail(liveDetail);
+  const totalCostAll = liveCosts
+    ? liveCosts.totalCost
+    : totOnCost * ON_HRS + totOffCost * OFF_HRS;
+  const dispOnCost  = liveCosts ? liveCosts.onCost  : totOnCost  * ON_HRS;
+  const dispOffCost = liveCosts ? liveCosts.offCost : totOffCost * OFF_HRS;
   const priceMultiplier = margin < 100 ? 1 / (1 - margin / 100) : 1;
   const priceHr = blended * priceMultiplier;
 
@@ -446,12 +468,13 @@ const totalCostAll = (totOnCost + totOffCost) * HOURS;
       const { usDays, offDays } = locSplit(l, DAYS);
       return a + (locationKey === "us" ? usDays : offDays);
     }, 0);
+    const hrs = locationKey === "us" ? ON_HRS : OFF_HRS;
     const totCost = rows.reduce((a, l) => {
       const { onBill, offBill } = billRates(l, billByBand);
       const bill = locationKey === "us" ? onBill : offBill;
       const { usDays, offDays } = locSplit(l, DAYS);
       const days = locationKey === "us" ? usDays : offDays;
-      return a + days * bill * HOURS;
+      return a + days * bill * hrs;
     }, 0);
 
     return (
@@ -475,7 +498,7 @@ const totalCostAll = (totOnCost + totOffCost) * HOURS;
               const { usDays, offDays } = locSplit(l, DAYS);
               const lPpl = locationKey === "us" ? (l.us ?? 0) : (l.india ?? 0) + (l.ar ?? 0);
               const days = locationKey === "us" ? usDays : offDays;
-              const cost = days * bill * HOURS;
+              const cost = days * bill * hrs;
               return (
                 <tr key={l.band} style={{ cursor:"pointer" }}
                   onClick={() => setDrill({
@@ -522,8 +545,8 @@ const totalCostAll = (totOnCost + totOffCost) * HOURS;
 
       {/* ── Top KPIs ── */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr auto", gap:10, alignItems:"start" }}>
-        <KPI label="Onshore blended LCR"  value={fmtHr(onLCR)}  sub={`${fmtN(Math.round(totOnDays))} days × ${HOURS}hrs`} />
-        <KPI label="Offshore blended LCR" value={fmtHr(offLCR)} sub={`${fmtN(Math.round(totOffDays))} days × ${HOURS}hrs`} />
+        <KPI label="Onshore blended LCR"  value={fmtHr(onLCR)}  sub={`${fmtN(Math.round(totOnDays))} days × ${ON_HRS}hrs`} />
+        <KPI label="Offshore blended LCR" value={fmtHr(offLCR)} sub={`${fmtN(Math.round(totOffDays))} days × ${OFF_HRS}hrs`} />
         <KPI label="Overall blended LCR"  value={fmtHr(blended)} sub="weighted by staffed days" accent />
 
         {/* Margin input + derived price */}
@@ -557,17 +580,17 @@ const totalCostAll = (totOnCost + totOffCost) * HOURS;
         <div style={{ ...s.kpi }}>
           <div style={s.kpiLabel}>Total programme cost</div>
           <div style={{ fontSize:22, fontWeight:700 }}>{fmtM(totalCostAll)}</div>
-          <div style={s.kpiSub}>{fmtN(Math.round(totOnDays + totOffDays))} staffed days × 8 hrs</div>
+          <div style={s.kpiSub}>{liveCosts ? "per-resource LCR × days × hrs" : "LCR × days × hrs (8 on / 9 off)"}</div>
         </div>
         <div style={{ ...s.kpi }}>
           <div style={s.kpiLabel}>Onshore cost</div>
-          <div style={{ fontSize:22, fontWeight:700, color:US_COL }}>{fmtM(totOnCost * HOURS)}</div>
-          <div style={s.kpiSub}>{fmtHr(onLCR)} blended · {fmtN(Math.round(totOnDays))}d</div>
+          <div style={{ fontSize:22, fontWeight:700, color:US_COL }}>{fmtM(dispOnCost)}</div>
+          <div style={s.kpiSub}>{fmtHr(onLCR)} blended · {fmtN(Math.round(totOnDays))}d · 8 hrs</div>
         </div>
         <div style={{ ...s.kpi }}>
           <div style={s.kpiLabel}>Offshore cost</div>
-          <div style={{ fontSize:22, fontWeight:700, color:OFF_COL }}>{fmtM(totOffCost * HOURS)}</div>
-          <div style={s.kpiSub}>{fmtHr(offLCR)} blended · {fmtN(Math.round(totOffDays))}d</div>
+          <div style={{ fontSize:22, fontWeight:700, color:OFF_COL }}>{fmtM(dispOffCost)}</div>
+          <div style={s.kpiSub}>{fmtHr(offLCR)} blended · {fmtN(Math.round(totOffDays))}d · 9 hrs</div>
         </div>
         <div style={{ ...s.kpi, borderTop:"3px solid #A100FF" }}>
           <div style={s.kpiLabel}>Total programme price</div>
@@ -620,8 +643,8 @@ const totalCostAll = (totOnCost + totOffCost) * HOURS;
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{staffing.us}</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{(staffing.india ?? 0) + (staffing.argentina ?? 0)}</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{staffing.total}</td>
-                <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{fmtM(totOnCost * HOURS)}</td>
-                <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{fmtM(totOffCost * HOURS)}</td>
+                <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{fmtM(dispOnCost)}</td>
+                <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{fmtM(dispOffCost)}</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{fmtM(totalCostAll)}</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13, color:"#A100FF" }}>{fmtM(totalCostAll * priceMultiplier)}</td>
                 <td style={s.td} />

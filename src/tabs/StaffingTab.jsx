@@ -631,6 +631,7 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
   const [view, setView]     = useState("home");
   const [dragOver, setDragOver] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [margin, setMargin] = useState(23);
   const fileInputRef = useRef(null);
 
   function handleDrop(e) {
@@ -667,33 +668,6 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
         <Kpi label="Onshore %"         value={Math.round(staffing.us / total * 100) + "%"}      sub={`${staffing.us} US resources`} />
         <Kpi label="Offshore %"        value={Math.round(offshore / total * 100) + "%"}         sub={`${staffing.india ?? 0} IN · ${staffing.argentina ?? 0} AR`} />
         <Kpi label="Total staffed days" value={fmtN(Math.round(totalDays)) + "d"}              sub={`${total} resources`} />
-      </div>
-
-      {/* Onshore / offshore donut */}
-      <div style={{ display:"grid", gridTemplateColumns:"200px 1fr", gap:14, alignItems:"center" }}>
-        <ResponsiveContainer width="100%" height={140}>
-          <PieChart>
-            <Pie data={[{name:"Onshore",value:staffing.us},{name:"Offshore",value:offshore}]}
-              cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={3} dataKey="value">
-              <Cell fill={US_COL} />
-              <Cell fill={OFF_COL} />
-            </Pie>
-            <Tooltip formatter={v => fmtN(v)} contentStyle={{ fontSize:12, border:"0.5px solid var(--color-border-tertiary)", borderRadius:6 }} />
-          </PieChart>
-        </ResponsiveContainer>
-        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-          {[{label:"Onshore (US)",value:staffing.us,color:US_COL},{label:"Offshore",value:offshore,color:OFF_COL}].map(({label,value,color})=>(
-            <div key={label} style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <span style={{ width:10, height:10, borderRadius:"50%", background:color, flexShrink:0 }} />
-              <span style={{ fontSize:12, color:"var(--color-text-secondary)", minWidth:110 }}>{label}</span>
-              <span style={{ fontSize:13, fontWeight:600, color }}>{fmtN(value)}</span>
-              <span style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>({Math.round(value/total*100)}%)</span>
-            </div>
-          ))}
-          <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginTop:4 }}>
-            India {fmtN(staffing.india??0)} · Argentina {fmtN(staffing.argentina??0)}
-          </div>
-        </div>
       </div>
 
       {/* Staffing-only upload strip */}
@@ -744,7 +718,7 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
 
       {/* HOME */}
       {view === "home" && (
-        <HomeTab staffing={staffing} />
+        <HomeTab staffing={staffing} liveDetail={liveDetail} margin={margin} setMargin={setMargin} />
       )}
 
       {/* BY ROLE GROUP */}
@@ -953,7 +927,7 @@ export default function StaffingTab({ staffing, isLive, loading, storedName, sto
       )}
 
       {view === "pricing" && (
-        <PricingTab staffing={staffing} liveDetail={liveDetail} />
+        <PricingTab staffing={staffing} liveDetail={liveDetail} margin={margin} setMargin={setMargin} />
       )}
 
       {view === "reinvent" && (

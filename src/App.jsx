@@ -106,9 +106,8 @@ export default function App() {
         display: "flex", alignItems: "center", gap: 12, height: 52,
       }}>
         <span style={{ color:"#A100FF", fontWeight:800, fontSize:18, letterSpacing:-0.5 }}>◆</span>
-        <span style={{ color:"#FFFFFF", fontWeight:600, fontSize:14, letterSpacing:-0.2 }}>Staffing Viewer</span>
-        <span style={{ color:"rgba(255,255,255,0.15)", fontSize:11 }}>·</span>
-        <span style={{ color:"rgba(255,255,255,0.4)", fontSize:12 }}>FXF Day 2 Program</span>
+        <span style={{ color:"#FFFFFF", fontWeight:600, fontSize:14, letterSpacing:-0.2 }}>Staffing Analysis</span>
+        <span style={{ color:"rgba(255,255,255,0.25)", fontSize:11, fontStyle:"italic", fontWeight:400 }}>For internal purpose only</span>
         <div style={{ flex:1 }} />
         {isLive ? (
           <span style={{

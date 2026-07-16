@@ -23,7 +23,7 @@ export const LEVEL_ORDER = [
 const COLS = {
   program: 0, roleGroup: 3, project: 4, pod: 5, role: 8,
   location: 12, name: 13, enterpriseId: 14,
-  levelBand: 15, billCode: 16, lcr: 17, fte: 19, totalDays: 36,
+  levelBand: 15, billCode: 16, lcr: 17, fte: 19, totalDays: 36, cost: 37,
 };
 
 function normaliseGroup(g) {
@@ -232,6 +232,7 @@ export function parseStaffingModel(wb) {
       eid:      row[COLS.enterpriseId] ? String(row[COLS.enterpriseId]).trim() : null,
       level:    String(row[COLS.levelBand] ?? "").trim(),
       billCode: row[COLS.lcr] != null ? parseFloat(row[COLS.lcr]) : (row[COLS.billCode] != null ? parseFloat(row[COLS.billCode]) : null),
+      cost: row[COLS.cost] != null ? parseFloat(row[COLS.cost]) : null,
       months,
       totalDays: row[COLS.totalDays] != null ? Math.round(Number(row[COLS.totalDays]) * 100) / 100 : 0,
     });
