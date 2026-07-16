@@ -32,7 +32,7 @@ function normaliseGroup(g) {
 }
 
 function normaliseLevelBand(band) {
-  if (band === "Accenture Leadership") return "Leadership";
+  if (band.toLowerCase().endsWith("leadership")) return "Leadership";
   return band;
 }
 
