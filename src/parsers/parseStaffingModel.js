@@ -33,12 +33,12 @@ const HEADER_ALIASES = {
 
 const REQUIRED_FIELDS = ["project", "location", "levelBand", "lcr", "fte", "totalDays"];
 
-function normaliseGroup(g) {
+function normalizeGroup(g) {
   if (g === "data portfolio") return "Data Portfolio";
   return g;
 }
 
-function normaliseLevelBand(band) {
+function normalizeLevelBand(band) {
   if (band.toLowerCase().endsWith("leadership")) return "Leadership";
   return band;
 }
@@ -54,7 +54,7 @@ export function parseStaffingModel(wb) {
     );
   }
 
-  // Row 0 = programme title header; row 1 = column headers; data starts row 2
+  // Row 0 = program title header; row 1 = column headers; data starts row 2
   const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
 
   // Build colMap by scanning row 1 (header row) case-insensitively
@@ -121,7 +121,7 @@ export function parseStaffingModel(wb) {
     const podName      = String(row[colMap.pod]          ?? "").trim().replace(/\s+/g, " ");
     const location     = String(row[colMap.location]     ?? "").trim();
     const enterpriseId = String(row[colMap.enterpriseId] ?? "").trim();
-    const levelBand    = normaliseLevelBand(String(row[colMap.levelBand] ?? "").trim());
+    const levelBand    = normalizeLevelBand(String(row[colMap.levelBand] ?? "").trim());
     const billCode     = row[colMap.billCode]  != null ? parseFloat(row[colMap.billCode])  : null;
     const lcr          = row[colMap.lcr]       != null ? parseFloat(row[colMap.lcr])       : null;
     const rate         = lcr ?? billCode; // prefer LCR; fall back to bill code
@@ -284,7 +284,7 @@ export function parseStaffingModel(wb) {
       location: String(row[colMap.location]     ?? "").trim(),
       name:     row[colMap.name]         ? String(row[colMap.name]).trim()         : null,
       eid:      row[colMap.enterpriseId] ? String(row[colMap.enterpriseId]).trim() : null,
-      level:    normaliseLevelBand(String(row[colMap.levelBand] ?? "").trim()),
+      level:    normalizeLevelBand(String(row[colMap.levelBand] ?? "").trim()),
       billCode: row[colMap.lcr] != null ? parseFloat(row[colMap.lcr]) : (row[colMap.billCode] != null ? parseFloat(row[colMap.billCode]) : null),
       cost:     row[colMap.cost] != null ? parseFloat(row[colMap.cost]) : null,
       months,

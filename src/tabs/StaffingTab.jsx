@@ -300,15 +300,37 @@ function ReinventSection({ staffing }) {
   );
 
   const LevelTable = ({ title, color, levels, actualPctFn, normPctFn, guideKey }) => (
-    <div style={{ ...s.card, overflow:"hidden", padding:0 }}>
+    <div style={{ ...s.card, overflow:"visible", padding:0 }}>
       <div style={{ padding:"9px 14px", borderBottom:"1px solid var(--border)", fontSize:12, fontWeight:700, letterSpacing:0.4, textTransform:"uppercase", color }}>
         {title}
       </div>
       <table style={s.tbl}>
         <thead>
           <tr>
-            {["Level band","Actual %","Normalised %","Target %","Gap"].map((h,i) => (
-              <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}), fontSize:12 }}>{h}</th>
+            {["Level band","Actual %","Normalized %","Target %","Gap"].map((h,i) => (
+              <th key={i} style={{ ...s.th, ...(i>=1?s.thR:{}), fontSize:12 }}>
+                {h === "Normalized %" ? (
+                  <span style={{ display:"inline-flex", alignItems:"center", gap:3, justifyContent:"flex-end" }}>
+                    {h}
+                    <InfoTip>
+                      <div style={{ fontWeight:700, color:"var(--text-h)", marginBottom:6, fontSize:12 }}>How Normalized % is calculated</div>
+                      <div style={{ fontSize:11, marginBottom:8, lineHeight:1.7 }}>
+                        <strong style={{ color:"var(--text-h)" }}>Formula:</strong><br />
+                        Normalized % = actual headcount in this level ÷ <em>target pool size</em> × 100
+                      </div>
+                      <div style={{ fontSize:11, marginBottom:8, lineHeight:1.7 }}>
+                        The denominator is the <strong style={{ color:"var(--text-h)" }}>target pool</strong> — what the onshore or offshore headcount <em>should</em> be per the guideline — not the actual count. This removes distortion when your location split is off-ratio.
+                      </div>
+                      <div style={{ fontSize:11, lineHeight:1.7, padding:"8px 10px", background:"var(--row-alt)", borderRadius:6, border:"1px solid var(--border)" }}>
+                        <strong style={{ color:"var(--text-h)" }}>Example</strong><br />
+                        10 Managers, target onshore pool = 25 (guideline 25% of 100 total)<br />
+                        Normalized = 10 ÷ 25 = <strong style={{ color:"#A100FF" }}>40%</strong><br />
+                        <span style={{ color:"var(--text-m)" }}>vs actual: 10 ÷ 40 (actual onshore) = 25% — misleading if onshore is overweight</span>
+                      </div>
+                    </InfoTip>
+                  </span>
+                ) : h}
+              </th>
             ))}
           </tr>
         </thead>
@@ -337,7 +359,7 @@ function ReinventSection({ staffing }) {
           })}
           <tr style={{ background:"var(--row-alt)" }}>
             <td colSpan={5} style={{ ...s.td, fontSize:12, color:"var(--text-b)", fontStyle:"italic", padding:"8px 12px" }}>
-              Normalised % = actual headcount ÷ target pool ({guideKey === "on" ? targetOnCount : targetOffCount} people at {guideKey === "on" ? guide.onPct : guide.offPct}% of {total})
+              Normalized % = actual headcount ÷ target pool ({guideKey === "on" ? targetOnCount : targetOffCount} people at {guideKey === "on" ? guide.onPct : guide.offPct}% of {total})
             </td>
           </tr>
         </tbody>
@@ -422,10 +444,10 @@ function ReinventSection({ staffing }) {
                 <strong style={{ color:"var(--text-h)" }}>pp = percentage points</strong> — direct difference between two percentages (e.g. 28% − 25% = +3pp).
               </div>
               <div style={{ marginBottom:8 }}>
-                <strong style={{ color:"var(--text-h)" }}>Gap = Normalised % − Target %</strong>
+                <strong style={{ color:"var(--text-h)" }}>Gap = Normalized % − Target %</strong>
               </div>
               <div style={{ marginBottom:8, fontSize:11 }}>
-                The <em>normalised %</em> uses the target pool size as denominator — not your actual headcount — so the comparison is distortion-free regardless of whether your on/off split is already at target.
+                The <em>normalized %</em> uses the target pool size as denominator — not your actual headcount — so the comparison is distortion-free regardless of whether your on/off split is already at target.
               </div>
               <div style={{ display:"flex", flexDirection:"column", gap:4, fontSize:11, borderTop:"1px solid var(--border)", paddingTop:8 }}>
                 <span><i className="ti ti-circle-check" style={{ color:"#10B981", marginRight:5 }} />≤ 3pp — within tolerance</span>
@@ -480,7 +502,7 @@ function ReinventSection({ staffing }) {
       </div>
 
       <div style={{ ...s.card, padding:14 }}>
-        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:4 }}>Level mix — normalised vs target</div>
+        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:4 }}>Level mix — normalized vs target</div>
         <div style={{ fontSize:11, color:"var(--text-m)", marginBottom:10 }}>
           Solid bars use target pool size as denominator ({targetOnCount} on · {targetOffCount} off), removing location-mix distortion
         </div>
@@ -504,9 +526,9 @@ function ReinventSection({ staffing }) {
             <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:10, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} />
             <Tooltip formatter={(v, name) => [`${v}%`, name]} contentStyle={{ fontSize:11, border:"0.5px solid var(--border)", borderRadius:6 }} />
             <Legend wrapperStyle={{ fontSize:11 }} />
-            <Bar dataKey="onNorm"    name="On normalised"  fill={US_COL}  barSize={8} radius={[2,2,0,0]} />
+            <Bar dataKey="onNorm"    name="On normalized"  fill={US_COL}  barSize={8} radius={[2,2,0,0]} />
             <Bar dataKey="onTarget"  name="On target"      fill={US_COL}  barSize={8} radius={[2,2,0,0]} fillOpacity={0.35} />
-            <Bar dataKey="offNorm"   name="Off normalised" fill={OFF_COL} barSize={8} radius={[2,2,0,0]} />
+            <Bar dataKey="offNorm"   name="Off normalized" fill={OFF_COL} barSize={8} radius={[2,2,0,0]} />
             <Bar dataKey="offTarget" name="Off target"     fill={OFF_COL} barSize={8} radius={[2,2,0,0]} fillOpacity={0.35} />
           </BarChart>
         </ResponsiveContainer>
@@ -1003,7 +1025,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
               <span><span style={dot(OFF_COL)} />India (offshore)</span>
               <span><span style={dot("#B45309")} />Argentina (offshore)</span>
               <span style={{ marginLeft:"auto" }}>
-                Overall % = share of total programme staffed days ({fmtN(Math.round(totalDays))}d)
+                Overall % = share of total program staffed days ({fmtN(Math.round(totalDays))}d)
               </span>
             </div>
           </div>

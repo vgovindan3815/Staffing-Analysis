@@ -345,7 +345,7 @@ export default function HomeTab({ staffing, liveDetail, monthLabels }) {
           sub={`${named} named · ${tbd} TBD`}
         />
         <KpiCard
-          label="Programme cost"
+          label="Program cost"
           value={costs ? fmtCost(costs.totalCost) : "—"}
           sub={costs ? `${fmtCost(costs.onCost)} on · ${fmtCost(costs.offCost)} off` : "Upload file to see cost"}
         />

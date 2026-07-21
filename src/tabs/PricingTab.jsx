@@ -575,10 +575,10 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
         </div>
       </div>
 
-      {/* Total programme cost + price */}
+      {/* Total program cost + price */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:10 }}>
         <div style={{ ...s.kpi }}>
-          <div style={s.kpiLabel}>Total programme cost</div>
+          <div style={s.kpiLabel}>Total program cost</div>
           <div style={{ fontSize:22, fontWeight:700 }}>{fmtM(totalCostAll)}</div>
           <div style={s.kpiSub}>{liveCosts ? "per-resource LCR × days × hrs" : "LCR × days × hrs (8 on / 9 off)"}</div>
         </div>
@@ -593,7 +593,7 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
           <div style={s.kpiSub}>{fmtHr(offLCR)} blended · {fmtN(Math.round(totOffDays))}d · 9 hrs</div>
         </div>
         <div style={{ ...s.kpi, borderTop:"3px solid #A100FF" }}>
-          <div style={s.kpiLabel}>Total programme price</div>
+          <div style={s.kpiLabel}>Total program price</div>
           <div style={{ fontSize:22, fontWeight:700, color:"#A100FF" }}>{fmtM(totalCostAll * priceMultiplier)}</div>
           <div style={s.kpiSub}>at {margin.toFixed(1)}% margin</div>
         </div>

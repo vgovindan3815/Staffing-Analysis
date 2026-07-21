@@ -60,7 +60,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
   };
   const locActive = (loc) => locFilter.size === 0 || locFilter.has(loc);
 
-  // Loc colour mapping
+  // Loc color mapping
   const locColor = { US: US_COL, India: OFF_COL, Argentina: AR_COL };
   const locCount = {
     US: us,
@@ -156,7 +156,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
       </SbSection>
 
       {/* Cost + margin */}
-      <SbSection title="Programme cost">
+      <SbSection title="Program cost">
         {costs ? (
           <>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>

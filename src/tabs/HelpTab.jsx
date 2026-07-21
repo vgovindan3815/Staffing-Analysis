@@ -6,14 +6,14 @@ const TEXT_B  = "var(--text-b)";
 const TEXT_M  = "var(--text-m)";
 
 const COLUMNS = [
-  { col:"A / Program",       header:"program",         required:false, description:"Programme name — same value in all rows" },
+  { col:"A / Program",       header:"program",         required:false, description:"Program name — same value in all rows" },
   { col:"E / Project",       header:"project",          required:true,  description:"Group name used in all breakdowns (e.g. App Migration)" },
   { col:"F / Pod Name",      header:"pod name",         required:false, description:"Sub-team / pod (e.g. Migration Pod 1)" },
   { col:"I / Project Role",  header:"project role",     required:false, description:"Job title or skill profile" },
   { col:"M / Location",      header:"location",         required:true,  description:"USA · India · Argentina — controls onshore (8 hrs) vs offshore (9 hrs)" },
   { col:"N / Name",          header:"name",             required:false, description:"Resource name — leave blank for TBD roles" },
   { col:"O / Enterprise ID", header:"enterprise id",    required:false, description:"EID — used to count Named vs TBD; blank = TBD" },
-  { col:"P / Level Band",    header:"level band",       required:true,  description:"See valid values below. Any band ending with 'Leadership' is auto-normalised." },
+  { col:"P / Level Band",    header:"level band",       required:true,  description:"See valid values below. Any band ending with 'Leadership' is auto-normalized." },
   { col:"Q / Bill Code",     header:"bill code",        required:false, description:"Fallback rate ($/hr) — used only when LCR is blank" },
   { col:"R / LCR",           header:"lcr",              required:true,  description:"Labour Cost Rate ($/hr) — primary rate for all cost calculations" },
   { col:"T / Total FTE",     header:"total fte",        required:true,  description:"Sum of monthly FTE fractions — rows with 0 are skipped" },
@@ -44,7 +44,7 @@ export default function HelpTab() {
         <p style={{ fontSize:13, color:TEXT_B, lineHeight:1.7 }}>
           Upload any Excel (.xlsx / .xls) file with a sheet named exactly <strong style={{ color:TEXT_H }}>Staffing Plan</strong>.
           Columns are detected by header name — they can be in any order.
-          Row 1 = programme title, Row 2 = column headers, Row 3 onwards = data.
+          Row 1 = program title, Row 2 = column headers, Row 3 onwards = data.
         </p>
       </div>
 

@@ -20,7 +20,7 @@ const QA = [
   },
   {
     keywords: ["level", "band", "grade", "seniority"],
-    answer: "Supported level bands: Leadership, 5-Associate Director, 6-Senior Manager, 7-Manager, 8-Associate Manager, 9-Team Lead/Consultant, 10-Senior Analyst, 11-Analyst, 12-Associate. Any band ending with 'Leadership' is normalised automatically.",
+    answer: "Supported level bands: Leadership, 5-Associate Director, 6-Senior Manager, 7-Manager, 8-Associate Manager, 9-Team Lead/Consultant, 10-Senior Analyst, 11-Analyst, 12-Associate. Any band ending with 'Leadership' is normalized automatically.",
   },
   {
     keywords: ["upload", "file", "excel", "import", "how to"],
@@ -44,7 +44,7 @@ const QA = [
   },
   {
     keywords: ["reinvent", "compliance", "touch", "low touch", "mid touch", "high touch"],
-    answer: "The Reinvent compliance tab compares your level mix against Low Touch, Mid Touch, and High Touch staffing model targets. It highlights gaps using colour-coded badges.",
+    answer: "The Reinvent compliance tab compares your level mix against Low Touch, Mid Touch, and High Touch staffing model targets. It highlights gaps using color-coded badges.",
   },
   {
     keywords: ["help", "template", "download", "guide"],

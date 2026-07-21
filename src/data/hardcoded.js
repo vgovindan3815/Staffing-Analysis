@@ -155,7 +155,7 @@ export const PORTFOLIOS = [
 export const CUSTOM_SOLUTIONS = [
   { name:"Security",      days:18679, cost:33.347, note:"1,036 security-flagged apps" },
   { name:"ServiceNow",    days:7940,  cost:14.176, note:"Separate ServiceNow tower" },
-  { name:"Observability", days:4335,  cost:7.739,  note:"Programme-wide" },
+  { name:"Observability", days:4335,  cost:7.739,  note:"Program-wide" },
   { name:"EUC",           days:1032,  cost:1.842,  note:"5 EUC apps" },
   { name:"COLO Build",    days:2143,  cost:3.826,  note:"WTC25 colo infrastructure" },
 ];
