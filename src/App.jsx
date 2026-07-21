@@ -161,22 +161,32 @@ export default function App() {
         <span style={{ color:"#FFFFFF", fontWeight:600, fontSize:14, letterSpacing:-0.2 }}>Staffing Analysis</span>
         <span style={{ color:"rgba(255,255,255,0.25)", fontSize:11, fontStyle:"italic", fontWeight:400 }}>For internal purpose only</span>
         <div style={{ flex:1 }} />
+        {/* Theme toggle — pill switch */}
         <button
           onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
           title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 8,
-            padding: '5px 10px',
-            cursor: 'pointer',
-            color: '#CBD5E1',
-            fontSize: 14,
-            display: 'flex', alignItems: 'center', gap: 5,
-            marginRight: 8,
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: '#CBD5E1', fontSize: 11, padding: '4px 8px',
+            marginRight: 6,
           }}
         >
-          <i className={`ti ${theme === 'dark' ? 'ti-sun' : 'ti-moon'}`} style={{ fontSize: 14 }} />
+          <span style={{ fontSize: 13, opacity: theme === 'light' ? 1 : 0.45 }}>☀️</span>
+          <div style={{
+            width: 34, height: 18, borderRadius: 9, position: 'relative',
+            background: theme === 'dark' ? '#A100FF' : 'rgba(255,255,255,0.25)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            transition: 'background 0.2s', flexShrink: 0,
+          }}>
+            <div style={{
+              position: 'absolute', top: 2,
+              left: theme === 'dark' ? 16 : 2,
+              width: 12, height: 12, borderRadius: '50%',
+              background: '#fff', transition: 'left 0.2s',
+            }} />
+          </div>
+          <span style={{ fontSize: 13, opacity: theme === 'dark' ? 1 : 0.45 }}>🌙</span>
         </button>
         {isLive ? (
           <span style={{
