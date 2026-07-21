@@ -155,6 +155,45 @@ const MAINFRAME_MODELS = {
   },
 };
 
+function InfoTip({ children }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position:"relative", display:"inline-flex", alignItems:"center" }}>
+      <span
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        style={{
+          display:"inline-flex", alignItems:"center", justifyContent:"center",
+          width:14, height:14, borderRadius:"50%",
+          background:"rgba(161,0,255,0.15)", color:"#A100FF",
+          fontSize:9, fontWeight:800, cursor:"help", marginLeft:5,
+          flexShrink:0, userSelect:"none", lineHeight:1,
+        }}
+      >i</span>
+      {show && (
+        <div style={{
+          position:"absolute", bottom:"calc(100% + 8px)", left:"50%",
+          transform:"translateX(-50%)",
+          background:"var(--bg-card)", border:"1px solid var(--border)",
+          borderRadius:10, padding:"12px 14px", zIndex:999,
+          width:300, boxShadow:"0 6px 24px rgba(0,0,0,0.25)",
+          fontSize:12, color:"var(--text-b)", lineHeight:1.7, whiteSpace:"normal",
+          pointerEvents:"none",
+        }}>
+          {children}
+          {/* Arrow */}
+          <div style={{
+            position:"absolute", bottom:-6, left:"50%", transform:"translateX(-50%)",
+            width:10, height:10, background:"var(--bg-card)",
+            border:"1px solid var(--border)", borderTop:"none", borderLeft:"none",
+            rotate:"45deg",
+          }} />
+        </div>
+      )}
+    </span>
+  );
+}
+
 function gapColor(gap) {
   const abs = Math.abs(gap);
   if (abs <= 3)  return "#10B981";
@@ -342,7 +381,7 @@ function ReinventSection({ staffing }) {
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
 
       {/* ── Selector header ─── */}
-      <div style={{ ...s.card, padding:"12px 16px", display:"flex", flexDirection:"column", gap:10 }}>
+      <div style={{ ...s.card, padding:"12px 16px", overflow:"visible", display:"flex", flexDirection:"column", gap:10 }}>
 
         {/* Row 1: Model type */}
         <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
@@ -373,10 +412,27 @@ function ReinventSection({ staffing }) {
               <button key={key} onClick={() => setTouch(key)} style={btnStyle(touch===key)}>{g.label}</button>
             ))}
           </div>
-          <span style={{ fontSize:11, color:"var(--text-m)", marginLeft:4 }}>
-            Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:11 }} />
-            {" "}· 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:11 }} />
-            {" "}· &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:11 }} />
+          <span style={{ fontSize:11, color:"var(--text-m)", display:"inline-flex", alignItems:"center" }}>
+            Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:11, marginLeft:2 }} />
+            {" "}· 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:11, marginLeft:2 }} />
+            {" "}· &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:11, marginLeft:2 }} />
+            <InfoTip>
+              <div style={{ fontWeight:700, color:"var(--text-h)", marginBottom:6, fontSize:12 }}>Understanding gap badges</div>
+              <div style={{ marginBottom:6 }}>
+                <strong style={{ color:"var(--text-h)" }}>pp = percentage points</strong> — direct difference between two percentages (e.g. 28% − 25% = +3pp).
+              </div>
+              <div style={{ marginBottom:8 }}>
+                <strong style={{ color:"var(--text-h)" }}>Gap = Normalised % − Target %</strong>
+              </div>
+              <div style={{ marginBottom:8, fontSize:11 }}>
+                The <em>normalised %</em> uses the target pool size as denominator — not your actual headcount — so the comparison is distortion-free regardless of whether your on/off split is already at target.
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:4, fontSize:11, borderTop:"1px solid var(--border)", paddingTop:8 }}>
+                <span><i className="ti ti-circle-check" style={{ color:"#10B981", marginRight:5 }} />≤ 3pp — within tolerance</span>
+                <span><i className="ti ti-alert-triangle" style={{ color:"#B45309", marginRight:5 }} />3–8pp — moderate deviation, worth monitoring</span>
+                <span><i className="ti ti-circle-x" style={{ color:"#EF4444", marginRight:5 }} />&gt; 8pp — significant gap from target pyramid</span>
+              </div>
+            </InfoTip>
           </span>
         </div>
 
