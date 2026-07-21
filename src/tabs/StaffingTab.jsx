@@ -65,15 +65,15 @@ const REINVENT = {
 
 function gapColor(gap) {
   const abs = Math.abs(gap);
-  if (abs <= 3)  return "var(--color-text-success)";
-  if (abs <= 8)  return "#B45309";
-  return "var(--color-text-danger)";
+  if (abs <= 3)  return "#10B981";
+  if (abs <= 8)  return "#F59E0B";
+  return "#EF4444";
 }
 function gapBg(gap) {
   const abs = Math.abs(gap);
-  if (abs <= 3)  return "var(--color-background-success)";
-  if (abs <= 8)  return "#FFFBEB";
-  return "var(--color-background-danger)";
+  if (abs <= 3)  return "rgba(16,185,129,0.12)";
+  if (abs <= 8)  return "rgba(245,158,11,0.15)";
+  return "rgba(239,68,68,0.12)";
 }
 function gapIcon(gap) {
   const abs = Math.abs(gap);
@@ -166,7 +166,7 @@ function ReinventSection({ staffing }) {
 
   const LevelTable = ({ title, color, levels, actualPctFn, normPctFn, guideKey }) => (
     <div style={{ ...s.card, overflow:"hidden", padding:0 }}>
-      <div style={{ padding:"9px 14px", borderBottom:"1px solid #E0E0E0", fontSize:12, fontWeight:700, letterSpacing:0.4, textTransform:"uppercase", color }}>
+      <div style={{ padding:"9px 14px", borderBottom:"1px solid #1E293B", fontSize:12, fontWeight:700, letterSpacing:0.4, textTransform:"uppercase", color }}>
         {title}
       </div>
       <table style={s.tbl}>
@@ -191,17 +191,17 @@ function ReinventSection({ staffing }) {
                   <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:LEVEL_COL[band]||TEAL, marginRight:8, verticalAlign:1 }} />
                   {band}
                 </td>
-                <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#888888" }}>{actualPct.toFixed(1)}%</td>
+                <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#94A3B8" }}>{actualPct.toFixed(1)}%</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:600, fontSize:13 }}>{normPct.toFixed(1)}%</td>
-                <td style={{ ...s.td, ...s.tdR, color:"#444444", fontSize:13 }}>{targetPct.toFixed(1)}%</td>
+                <td style={{ ...s.td, ...s.tdR, color:"#94A3B8", fontSize:13 }}>{targetPct.toFixed(1)}%</td>
                 <td style={{ ...s.td, ...s.tdR, fontSize:13 }}>
                   <GapBadge gap={gap} />
                 </td>
               </tr>
             );
           })}
-          <tr style={{ background:"#F5F5F5" }}>
-            <td colSpan={5} style={{ ...s.td, fontSize:12, color:"#888888", fontStyle:"italic", padding:"8px 12px" }}>
+          <tr style={{ background:"rgba(255,255,255,0.03)" }}>
+            <td colSpan={5} style={{ ...s.td, fontSize:12, color:"#94A3B8", fontStyle:"italic", padding:"8px 12px" }}>
               Normalised % = actual headcount ÷ target pool ({guideKey === "on" ? targetOnCount : targetOffCount} people at {guideKey === "on" ? guide.onPct : guide.offPct}% of {total})
             </td>
           </tr>
@@ -216,11 +216,11 @@ function ReinventSection({ staffing }) {
     const gapPct = gap / target * 100;
     return (
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"10px 0", borderBottom:"1px solid #EBEBEB" }}>
-        <span style={{ fontSize:13, color:"#444444" }}>{label}</span>
+        padding:"10px 0", borderBottom:"1px solid #1E293B" }}>
+        <span style={{ fontSize:13, color:"#94A3B8" }}>{label}</span>
         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
           <span style={{ fontSize:18, fontWeight:700 }}>{unit}{actual.toFixed(2)}</span>
-          <span style={{ fontSize:12, color:"#888888" }}>target {unit}{target.toFixed(2)}</span>
+          <span style={{ fontSize:12, color:"#94A3B8" }}>target {unit}{target.toFixed(2)}</span>
           <span style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"2px 8px",
             borderRadius:4, background:gapBg(gapPct), color:gapColor(gapPct), fontWeight:500, fontSize:12 }}>
             <i className={`ti ${gapIcon(gapPct)}`} style={{ fontSize:12 }} />
@@ -234,28 +234,28 @@ function ReinventSection({ staffing }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-        <span style={{ fontSize:13, color:"#444444" }}>Reinvent model:</span>
+        <span style={{ fontSize:13, color:"#94A3B8" }}>Reinvent model:</span>
         <div style={{ display:"flex", gap:4 }}>
           {Object.entries(REINVENT).map(([key, g]) => (
             <button key={key} onClick={() => setTouch(key)}
               style={{ padding:"6px 14px", fontSize:13, borderRadius:6, cursor:"pointer", fontWeight:touch===key?600:400,
-                background: touch===key ? TEAL : "#F5F5F5",
-                color: touch===key ? "white" : "#444444",
-                border: touch===key ? "none" : "1px solid #E0E0E0" }}>
+                background: touch===key ? TEAL : "#1a2234",
+                color: touch===key ? "white" : "#94A3B8",
+                border: touch===key ? "none" : "1px solid #1E293B" }}>
               {g.label}
             </button>
           ))}
         </div>
-        <span style={{ fontSize:12, color:"#888888", marginLeft:4 }}>
-          Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"var(--color-text-success)", fontSize:12 }} /> · 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:12 }} /> · &gt;8pp <i className="ti ti-circle-x" style={{ color:"var(--color-text-danger)", fontSize:12 }} />
+        <span style={{ fontSize:12, color:"#94A3B8", marginLeft:4 }}>
+          Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:12 }} /> · 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:12 }} /> · &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:12 }} />
         </span>
       </div>
 
       <div style={{ ...s.card, padding:"12px 16px" }}>
-        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--color-text-secondary)", marginBottom:10 }}>Location mix</div>
+        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"#94A3B8", marginBottom:10 }}>Location mix</div>
         <div style={{ display:"grid", gridTemplateColumns:"80px 1fr 1fr 1fr 1fr", gap:10, marginBottom:12, alignItems:"center" }}>
-          <div style={{ background:"var(--color-background-secondary)", borderRadius:6, padding:"8px 12px", gridRow:"1", textAlign:"center" }}>
-            <div style={{ fontSize:10, color:"var(--color-text-tertiary)", marginBottom:2 }}>Total</div>
+          <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:6, padding:"8px 12px", gridRow:"1", textAlign:"center" }}>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)", marginBottom:2 }}>Total</div>
             <div style={{ fontSize:16, fontWeight:700 }}>{total}</div>
           </div>
           {[
@@ -264,24 +264,24 @@ function ReinventSection({ staffing }) {
             { label:"Onshore target",  count:targetOnCount,  pct:guide.onPct,  color:US_COL,  sub:`at ${guide.onPct}%`, faded:true },
             { label:"Offshore target", count:targetOffCount, pct:guide.offPct, color:OFF_COL, sub:`at ${guide.offPct}%`, faded:true },
           ].map(({label, count, pct: pctVal, color, sub, faded}) => (
-            <div key={label} style={{ background: "var(--color-background-secondary)", borderRadius:6, padding:"8px 12px", border: faded ? "0.5px dashed var(--color-border-tertiary)" : "0.5px solid var(--color-border-tertiary)" }}>
-              <div style={{ fontSize:10, color:"var(--color-text-tertiary)", marginBottom:2 }}>{label}</div>
+            <div key={label} style={{ background: "rgba(255,255,255,0.03)", borderRadius:6, padding:"8px 12px", border: faded ? "0.5px dashed var(--color-border-tertiary)" : "0.5px solid var(--color-border-tertiary)" }}>
+              <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)", marginBottom:2 }}>{label}</div>
               <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
-                <span style={{ fontSize:16, fontWeight:700, color: faded ? "var(--color-text-secondary)" : color }}>{pctVal.toFixed(0)}%</span>
-                <span style={{ fontSize:12, color:"var(--color-text-secondary)", fontWeight:500 }}>{count}</span>
-                <span style={{ fontSize:10, color:"var(--color-text-tertiary)" }}>{sub}</span>
+                <span style={{ fontSize:16, fontWeight:700, color: faded ? "#94A3B8" : color }}>{pctVal.toFixed(0)}%</span>
+                <span style={{ fontSize:12, color:"#94A3B8", fontWeight:500 }}>{count}</span>
+                <span style={{ fontSize:10, color:"rgba(255,255,255,0.3)" }}>{sub}</span>
               </div>
             </div>
           ))}
         </div>
 
         <div style={{ display:"flex", alignItems:"center", gap:8, fontSize:12 }}>
-          <span style={{ color:"var(--color-text-secondary)" }}>Onshore gap:</span>
+          <span style={{ color:"#94A3B8" }}>Onshore gap:</span>
           <span style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"2px 8px", borderRadius:4, background:gapBg(locGap), color:gapColor(locGap), fontWeight:500 }}>
             <i className={`ti ${gapIcon(locGap)}`} style={{ fontSize:12 }} />
             {locGap > 0 ? "+" : ""}{locGap.toFixed(1)}pp vs {guide.label} target ({guide.onPct}% onshore)
           </span>
-          <span style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>— level mix below uses target pool ({targetOnCount} on · {targetOffCount} off) as denominator</span>
+          <span style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>— level mix below uses target pool ({targetOnCount} on · {targetOffCount} off) as denominator</span>
         </div>
       </div>
 
@@ -293,8 +293,8 @@ function ReinventSection({ staffing }) {
       </div>
 
       <div style={{ ...s.card, padding:14 }}>
-        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--color-text-secondary)", marginBottom:4 }}>Level mix — normalised vs target</div>
-        <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:10 }}>
+        <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"#94A3B8", marginBottom:4 }}>Level mix — normalised vs target</div>
+        <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginBottom:10 }}>
           Solid bars use target pool size as denominator ({targetOnCount} on · {targetOffCount} off), removing location-mix distortion
         </div>
         <ResponsiveContainer width="100%" height={200}>
@@ -312,9 +312,9 @@ function ReinventSection({ staffing }) {
             })}
             margin={{ top:4, right:12, left:0, bottom:40 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-tertiary)" vertical={false} />
-            <XAxis dataKey="band" tick={{ fontSize:10, fill:"var(--color-text-tertiary)" }} angle={-35} textAnchor="end" interval={0} />
-            <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:10, fill:"var(--color-text-tertiary)" }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+            <XAxis dataKey="band" tick={{ fontSize:10, fill:"rgba(255,255,255,0.3)" }} angle={-35} textAnchor="end" interval={0} />
+            <YAxis tickFormatter={v => `${v}%`} tick={{ fontSize:10, fill:"rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
             <Tooltip formatter={(v, name) => [`${v}%`, name]} contentStyle={{ fontSize:11, border:"0.5px solid var(--color-border-tertiary)", borderRadius:6 }} />
             <Legend wrapperStyle={{ fontSize:11 }} />
             <Bar dataKey="onNorm"    name="On normalised"  fill={US_COL}  barSize={8} radius={[2,2,0,0]} />
@@ -327,7 +327,7 @@ function ReinventSection({ staffing }) {
 
       <div style={{ ...s.card, padding:"16px 20px" }}>
         <div style={{ fontSize:13, fontWeight:700, letterSpacing:0.4, textTransform:"uppercase",
-          color:"#444444", marginBottom:16, paddingBottom:10, borderBottom:"1px solid #EBEBEB" }}>
+          color:"#94A3B8", marginBottom:16, paddingBottom:10, borderBottom:"1px solid #1E293B" }}>
           Economics
         </div>
 
@@ -337,27 +337,27 @@ function ReinventSection({ staffing }) {
             { label:"Offshore blended LCR", value:parsedOffLCR, sub:"derived from level mix" },
             { label:"Overall blended LCR",  value:actualBlendedLCR, sub:"weighted by staffed days", accent:true },
           ].map(k => (
-            <div key={k.label} style={{ background:"#F5F5F5", borderRadius:8, padding:"12px 16px",
-              border: k.accent ? "1px solid #D9B3FF" : "1px solid #E0E0E0" }}>
-              <div style={{ fontSize:12, color:"#888888", marginBottom:6, textTransform:"uppercase", letterSpacing:0.4 }}>
+            <div key={k.label} style={{ background:"rgba(255,255,255,0.03)", borderRadius:8, padding:"12px 16px",
+              border: k.accent ? "1px solid #D9B3FF" : "1px solid #1E293B" }}>
+              <div style={{ fontSize:12, color:"#94A3B8", marginBottom:6, textTransform:"uppercase", letterSpacing:0.4 }}>
                 {k.label}
               </div>
-              <div style={{ fontSize:22, fontWeight:700, color: k.accent ? "#A100FF" : "#000000" }}>
-                ${k.value.toFixed(2)}<span style={{ fontSize:13, fontWeight:400, color:"#888888" }}>/hr</span>
+              <div style={{ fontSize:22, fontWeight:700, color: k.accent ? "#A100FF" : "#F8FAFC" }}>
+                ${k.value.toFixed(2)}<span style={{ fontSize:13, fontWeight:400, color:"#94A3B8" }}>/hr</span>
               </div>
-              <div style={{ fontSize:12, color:"#888888", marginTop:4 }}>{k.sub}</div>
+              <div style={{ fontSize:12, color:"#94A3B8", marginTop:4 }}>{k.sub}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ background:"#F5F5F5", borderRadius:6, padding:"12px 16px",
+        <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:6, padding:"12px 16px",
           fontFamily:"var(--font-mono)", fontSize:12, lineHeight:2.0, marginBottom:16,
-          border:"1px solid #E0E0E0" }}>
-          <div style={{ color:"#888888" }}>Blended LCR = (onshore% × onshore LCR) + (offshore% × offshore LCR)</div>
-          <div>= ({actualOnPct.toFixed(1)}% × ${parsedOnLCR.toFixed(2)}) + ({actualOffPct.toFixed(1)}% × ${parsedOffLCR.toFixed(2)})</div>
-          <div>= ${(actualOnPct/100*parsedOnLCR).toFixed(2)} + ${(actualOffPct/100*parsedOffLCR).toFixed(2)}
+          border:"1px solid #1E293B" }}>
+          <div style={{ color:"#94A3B8" }}>Blended LCR = (onshore% × onshore LCR) + (offshore% × offshore LCR)</div>
+          <div style={{ color:"#CBD5E1" }}>= ({actualOnPct.toFixed(1)}% × ${parsedOnLCR.toFixed(2)}) + ({actualOffPct.toFixed(1)}% × ${parsedOffLCR.toFixed(2)})</div>
+          <div style={{ color:"#CBD5E1" }}>= ${(actualOnPct/100*parsedOnLCR).toFixed(2)} + ${(actualOffPct/100*parsedOffLCR).toFixed(2)}
           </div>
-          <div style={{ borderTop:"1px solid #E0E0E0", marginTop:6, paddingTop:6, fontWeight:700 }}>
+          <div style={{ borderTop:"1px solid #1E293B", marginTop:6, paddingTop:6, fontWeight:700 }}>
             = ${actualBlendedLCR.toFixed(2)}/hr
           </div>
         </div>
@@ -387,7 +387,7 @@ function synthesiseLevels(entity, allLevels, totUs, totIndia, totAr, DAYS) {
 
 const sectionHdrStyle = {
   fontSize: 11, fontWeight: 600, letterSpacing: 0.6, textTransform: "uppercase",
-  color: "var(--color-text-secondary)", padding: "6px 12px 4px",
+  color: "#94A3B8", padding: "6px 12px 4px",
   borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 4,
 };
 
@@ -411,13 +411,13 @@ function PersonDetailView({ entityType, entityName, levelBand, liveDetail, onBac
     for (const [k, v] of Object.entries(LOC_COL)) {
       if (loc.toUpperCase().includes(k.toUpperCase())) return v;
     }
-    return "var(--color-text-secondary)";
+    return "#94A3B8";
   };
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"var(--color-text-secondary)" }}>
-        <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--color-text-secondary)", fontSize:12, padding:0, display:"flex", alignItems:"center", gap:3 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"#94A3B8" }}>
+        <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:"#94A3B8", fontSize:12, padding:0, display:"flex", alignItems:"center", gap:3 }}>
           <i className="ti ti-arrow-left" style={{ fontSize:13 }} />
           {entityType === "group" ? "All role groups" : "All pods"}
         </button>
@@ -426,15 +426,15 @@ function PersonDetailView({ entityType, entityName, levelBand, liveDetail, onBac
           {entityName}
         </button>
         <span>/</span>
-        <span style={{ color:"var(--color-text-primary)", fontWeight:500 }}>
+        <span style={{ color:"#F8FAFC", fontWeight:500 }}>
           <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:LEVEL_COL[levelBand]||TEAL, marginRight:5, verticalAlign:1 }} />
           {levelBand}
         </span>
-        <span style={{ marginLeft:8, fontSize:11, color:"var(--color-text-tertiary)" }}>— {rows.length} resource{rows.length !== 1 ? "s" : ""}</span>
+        <span style={{ marginLeft:8, fontSize:11, color:"rgba(255,255,255,0.3)" }}>— {rows.length} resource{rows.length !== 1 ? "s" : ""}</span>
       </div>
 
       {rows.length === 0 ? (
-        <div style={{ ...s.card, padding:24, textAlign:"center", color:"var(--color-text-tertiary)", fontSize:12 }}>
+        <div style={{ ...s.card, padding:24, textAlign:"center", color:"rgba(255,255,255,0.3)", fontSize:12 }}>
           No individual rows found for this combination.
         </div>
       ) : (
@@ -457,13 +457,13 @@ function PersonDetailView({ entityType, entityName, levelBand, liveDetail, onBac
               </thead>
               <tbody>
                 {rows.map((r, idx) => (
-                  <tr key={idx} style={{ background: idx%2===1 ? "var(--color-background-secondary)" : undefined }}>
+                  <tr key={idx} style={{ background: idx%2===1 ? "rgba(255,255,255,0.03)" : undefined }}>
                     <td style={{ ...s.td, fontSize:11, whiteSpace:"nowrap" }}>{r.group}</td>
                     <td style={{ ...s.td, fontSize:11, whiteSpace:"nowrap" }}>{r.pod}</td>
                     <td style={{ ...s.td, fontSize:11 }}>{r.role}</td>
                     <td style={{ ...s.td, fontSize:11, color: locColor(r.location), fontWeight:500, whiteSpace:"nowrap" }}>{r.location}</td>
-                    <td style={{ ...s.td, fontSize:11, fontFamily:"var(--font-mono)", color:"var(--color-text-secondary)" }}>
-                      {r.eid ?? <span style={{ color:"var(--color-text-tertiary)" }}>TBD</span>}
+                    <td style={{ ...s.td, fontSize:11, fontFamily:"var(--font-mono)", color:"#94A3B8" }}>
+                      {r.eid ?? <span style={{ color:"rgba(255,255,255,0.3)" }}>TBD</span>}
                     </td>
                     <td style={{ ...s.td, fontSize:11 }}>
                       <span style={{ display:"inline-block", width:7, height:7, borderRadius:"50%", background:LEVEL_COL[r.level]||TEAL, marginRight:5, verticalAlign:1 }} />
@@ -471,7 +471,7 @@ function PersonDetailView({ entityType, entityName, levelBand, liveDetail, onBac
                     </td>
                     {(r.months ?? []).map((m, mi) => (
                       <td key={mi} style={{ ...s.td, ...s.tdR, fontSize:10, padding:"4px 6px",
-                        color: m > 0 ? "var(--color-text-primary)" : "var(--color-text-tertiary)" }}>
+                        color: m > 0 ? "#F8FAFC" : "rgba(255,255,255,0.3)" }}>
                         {m > 0 ? (Number.isInteger(m) ? m : m.toFixed(2)) : "—"}
                       </td>
                     ))}
@@ -537,26 +537,26 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
             return (
               <tr key={l.band} onClick={() => setPersonDetail(l.band)}
                 style={{ cursor:"pointer" }}
-                onMouseEnter={e => e.currentTarget.style.background="var(--color-background-secondary)"}
+                onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.03)"}
                 onMouseLeave={e => e.currentTarget.style.background=""}>
                 <td style={s.td}>
                   <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:LEVEL_COL[l.band]||TEAL, marginRight:8, verticalAlign:1 }} />
                   {l.band}
                 </td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(lPeople)}</td>
-                <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>
+                <td style={{ ...s.td, ...s.tdR, color:"#94A3B8" }}>
                   {sectionPeople > 0 ? Math.round(lPeople / sectionPeople * 100) + "%" : "—"}
                 </td>
                 <td style={{ ...s.td, ...s.tdR }}>
                   {groupTotalDays > 0 ? (lDays / groupTotalDays * 100).toFixed(1) + "%" : "—"}
                 </td>
-                <td style={{ ...s.td, ...s.tdR, fontSize:10, color:"var(--color-text-tertiary)" }}>
+                <td style={{ ...s.td, ...s.tdR, fontSize:10, color:"rgba(255,255,255,0.3)" }}>
                   <i className="ti ti-chevron-right" />
                 </td>
               </tr>
             );
           })}
-          <tr style={{ background:"var(--color-background-secondary)" }}>
+          <tr style={{ background:"rgba(255,255,255,0.03)" }}>
             <td style={{ ...s.td, fontWeight:500 }}>Subtotal</td>
             <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{sectionPeople}</td>
             <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>100%</td>
@@ -578,7 +578,7 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
       <div>
         <button
           onClick={onBack}
-          style={{ background:"none", border:"none", cursor:"pointer", color:"var(--color-text-secondary)", fontSize:12, padding:0, display:"flex", alignItems:"center", gap:4 }}
+          style={{ background:"none", border:"none", cursor:"pointer", color:"#94A3B8", fontSize:12, padding:0, display:"flex", alignItems:"center", gap:4 }}
         >
           <i className="ti ti-arrow-left" style={{ fontSize:13 }} />
           {detail.type === "group" ? "All role groups" : "All pods"}
@@ -587,24 +587,24 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10 }}>
         <div style={{ ...s.card, padding:"10px 14px" }}>
-          <div style={{ fontSize:11, color:"var(--color-text-secondary)", marginBottom:2 }}>Total resources</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:2 }}>Total resources</div>
           <div style={{ fontSize:20, fontWeight:700 }}>{groupPeople}</div>
-          <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{onshoreTotal} US · {offshoreTotal} offshore</div>
+          <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>{onshoreTotal} US · {offshoreTotal} offshore</div>
         </div>
         <div style={{ ...s.card, padding:"10px 14px" }}>
-          <div style={{ fontSize:11, color:"var(--color-text-secondary)", marginBottom:2 }}>Onshore</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:2 }}>Onshore</div>
           <div style={{ fontSize:20, fontWeight:700, color:US_COL }}>{onPct}%</div>
-          <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{onshoreTotal} US resources</div>
+          <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>{onshoreTotal} US resources</div>
         </div>
         <div style={{ ...s.card, padding:"10px 14px" }}>
-          <div style={{ fontSize:11, color:"var(--color-text-secondary)", marginBottom:2 }}>Offshore</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:2 }}>Offshore</div>
           <div style={{ fontSize:20, fontWeight:700, color:OFF_COL }}>{offPct}%</div>
-          <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{offshoreTotal} offshore resources</div>
+          <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>{offshoreTotal} offshore resources</div>
         </div>
         <div style={{ ...s.card, padding:"10px 14px" }}>
-          <div style={{ fontSize:11, color:"var(--color-text-secondary)", marginBottom:2 }}>Staffed days</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:2 }}>Staffed days</div>
           <div style={{ fontSize:20, fontWeight:700 }}>{fmtN(Math.round(groupTotalDays))}</div>
-          <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{groupPeople > 0 ? Math.round(groupTotalDays/groupPeople) : 0}d per person avg</div>
+          <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>{groupPeople > 0 ? Math.round(groupTotalDays/groupPeople) : 0}d per person avg</div>
         </div>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
@@ -678,7 +678,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
               label="project"
             />
             {groupFilter.size > 0 && (
-              <span style={{ fontSize:12, color:"#888" }}>
+              <span style={{ fontSize:12, color:"#94A3B8" }}>
                 Showing {visibleGroups.length} of {staffing.groups.length} projects
               </span>
             )}
@@ -713,14 +713,14 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                         <td style={{ ...s.td, ...s.tdR }}>{g.us}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{g.india}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(gDays))}</td>
-                        <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(gDays, totalDays)}</td>
-                        <td style={{ ...s.td, ...s.tdR, color: g.us/g.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
+                        <td style={{ ...s.td, ...s.tdR, color:"#94A3B8" }}>{pct(gDays, totalDays)}</td>
+                        <td style={{ ...s.td, ...s.tdR, color: g.us/g.people>0.5?"#10B981":"#94A3B8" }}>
                           {Math.round(g.us/g.people*100)}%
                         </td>
                       </tr>
                     );
                   })}
-                  <tr style={{ background:"var(--color-background-secondary)" }}>
+                  <tr style={{ background:"rgba(255,255,255,0.03)" }}>
                     <td style={{ ...s.td, fontWeight:500 }}>Total</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+g.people,0)}</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+g.us,0)}</td>
@@ -772,7 +772,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                         {l.band}
                       </td>
                       <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(lPeople)}</td>
-                      <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>
+                      <td style={{ ...s.td, ...s.tdR, color:"#94A3B8" }}>
                         {sectionPeople > 0 ? Math.round(lPeople / sectionPeople * 100) + "%" : "—"}
                       </td>
                       <td style={{ ...s.td, ...s.tdR }}>
@@ -781,7 +781,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                     </tr>
                   );
                 })}
-                <tr style={{ background:"var(--color-background-secondary)" }}>
+                <tr style={{ background:"rgba(255,255,255,0.03)" }}>
                   <td style={{ ...s.td, fontWeight:500 }}>Subtotal</td>
                   <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{sectionPeople}</td>
                   <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>100%</td>
@@ -811,7 +811,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                 daysFn={offDays} peopleKey="offshore"
               />
             </div>
-            <div style={{ ...s.card, padding:"8px 12px", display:"flex", gap:20, fontSize:11, color:"var(--color-text-secondary)" }}>
+            <div style={{ ...s.card, padding:"8px 12px", display:"flex", gap:20, fontSize:11, color:"#94A3B8" }}>
               <span><span style={dot(US_COL)} />US (onshore)</span>
               <span><span style={dot(OFF_COL)} />India (offshore)</span>
               <span><span style={dot("#B45309")} />Argentina (offshore)</span>
@@ -835,7 +835,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
               label="pod"
             />
             {podFilter.size > 0 && (
-              <span style={{ fontSize:12, color:"#888" }}>
+              <span style={{ fontSize:12, color:"#94A3B8" }}>
                 Showing {visiblePods.length} of {staffing.pods.length} pods
               </span>
             )}
@@ -863,21 +863,21 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                         onClick={() => { if (hasDetail) setDetail({ name: p.name, type:"pod", levels }); }}
                         style={{ cursor: hasDetail ? "pointer" : "default" }}>
                         <td style={s.td}>
-                          <span style={{ fontSize:10, background:"var(--color-background-secondary)", color:"var(--color-text-secondary)", padding:"1px 6px", borderRadius:4, marginRight:6 }}>{p.group.slice(0,12)}</span>
+                          <span style={{ fontSize:10, background:"rgba(255,255,255,0.03)", color:"#94A3B8", padding:"1px 6px", borderRadius:4, marginRight:6 }}>{p.group.slice(0,12)}</span>
                           {p.name}
                         </td>
                         <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{p.people}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{p.us}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{p.india}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(pDays))}</td>
-                        <td style={{ ...s.td, ...s.tdR, color:"var(--color-text-secondary)" }}>{pct(pDays, totalDays)}</td>
-                        <td style={{ ...s.td, ...s.tdR, color: p.us/p.people>0.5?"var(--color-text-success)":"var(--color-text-secondary)" }}>
+                        <td style={{ ...s.td, ...s.tdR, color:"#94A3B8" }}>{pct(pDays, totalDays)}</td>
+                        <td style={{ ...s.td, ...s.tdR, color: p.us/p.people>0.5?"#10B981":"#94A3B8" }}>
                           {Math.round(p.us/p.people*100)}%
                         </td>
                       </tr>
                     );
                   })}
-                  <tr style={{ background:"var(--color-background-secondary)" }}>
+                  <tr style={{ background:"rgba(255,255,255,0.03)" }}>
                     <td style={{ ...s.td, fontWeight:500 }}>Total</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visiblePods.reduce((a,p)=>a+p.people,0)}</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visiblePods.reduce((a,p)=>a+p.us,0)}</td>
@@ -914,7 +914,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
   );
 
   return (
-    <div style={{ padding: "20px 24px", flex: 1 }}>
+    <div style={{ padding: "20px 24px", flex: 1, background: "#0F172A", minHeight: "100vh" }}>
       {view === "home" && detail === null ? (
         <HomeTab staffing={staffing} liveDetail={liveDetail} monthLabels={monthLabels} />
       ) : (

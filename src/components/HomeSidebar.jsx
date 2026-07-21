@@ -1,243 +1,220 @@
 import { useState, useRef } from "react";
 
-const SIDEBAR_BG   = "#0D0020";
-const SECTION_BG   = "rgba(161,0,255,0.07)";
-const BORDER_COL   = "rgba(161,0,255,0.18)";
-const ACCENT       = "#A100FF";
-const TEXT_PRIMARY = "#FFFFFF";
-const TEXT_SUB     = "rgba(255,255,255,0.55)";
-const US_COL       = "#60A5FA";
-const OFF_COL      = "#FB923C";
-const AR_COL       = "#C084FC";
+const BG_SIDEBAR  = "#080D18";
+const BORDER      = "rgba(255,255,255,0.08)";
+const ACCENT      = "#A100FF";
+const TEXT_H      = "#F8FAFC";
+const TEXT_B      = "rgba(255,255,255,0.55)";
+const TEXT_M      = "rgba(255,255,255,0.3)";
+const US_COL      = "#60A5FA";
+const OFF_COL     = "#FB923C";
+const AR_COL      = "#C084FC";
+const SUCCESS_COL = "#10B981";
+const WARNING_COL = "#F59E0B";
 
-function fmtN(n) { return n?.toLocaleString() ?? "—"; }
 function fmtCost(v) {
   if (!v) return "—";
-  if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B";
-  if (v >= 1e6) return "$" + (v / 1e6).toFixed(1) + "M";
-  return "$" + (v / 1e3).toFixed(0) + "K";
+  if (v >= 1e9) return "$" + (v/1e9).toFixed(2) + "B";
+  if (v >= 1e6) return "$" + (v/1e6).toFixed(1) + "M";
+  return "$" + (v/1e3).toFixed(0) + "K";
 }
 
-function SidebarSection({ id, icon, title, summary, expanded, onToggle, children }) {
+function SbSection({ title, children }) {
   return (
-    <div style={{ borderBottom: `1px solid ${BORDER_COL}` }}>
-      <button
-        onClick={() => onToggle(id)}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", gap: 10,
-          padding: "16px 18px", background: "none", border: "none", cursor: "pointer",
-          color: TEXT_PRIMARY, textAlign: "left",
-        }}
-      >
-        <span style={{ fontSize: 18 }}>{icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: TEXT_SUB }}>{title}</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: TEXT_PRIMARY, letterSpacing: -0.5, marginTop: 2 }}>{summary}</div>
-        </div>
-        <i className={`ti ti-chevron-${expanded ? "up" : "down"}`} style={{ fontSize: 14, color: ACCENT, flexShrink: 0 }} />
-      </button>
-
-      <div style={{
-        overflow: "hidden",
-        maxHeight: expanded ? 600 : 0,
-        transition: "max-height 0.3s ease",
-      }}>
-        <div style={{ padding: "0 18px 18px" }}>
-          {children}
-        </div>
-      </div>
+    <div style={{ padding:"14px 16px", borderBottom:`1px solid ${BORDER}` }}>
+      <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.8, color:TEXT_M, marginBottom:12 }}>{title}</div>
+      {children}
     </div>
   );
 }
 
-function Row({ label, value, color, indent }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: `1px solid ${BORDER_COL}` }}>
-      <span style={{ fontSize: 12, color: TEXT_SUB, paddingLeft: indent ? 12 : 0 }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: color || TEXT_PRIMARY }}>{value}</span>
-    </div>
-  );
-}
-
-export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive, storedName, storedDate, onUpload, onReset }) {
-  const [expanded, setExpanded] = useState(new Set(["resources"]));
+export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive, storedName, storedDate, onUpload, onReset, liveDetail, locFilter, setLocFilter, allLocations }) {
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef(null);
 
-  const toggle = (id) => {
-    setExpanded(prev => {
+  const handleDrop = (e) => {
+    e.preventDefault(); setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) onUpload(f);
+  };
+
+  // Quick insights derived from data
+  const total    = staffing.total ?? 0;
+  const named    = staffing.named ?? total;
+  const tbd      = total - named;
+  const us       = staffing.us ?? 0;
+  const offshore = (staffing.india ?? 0) + (staffing.argentina ?? 0);
+  const largestGroup = staffing.groups?.[0];
+  const tdbPct   = total > 0 ? Math.round(tbd / total * 100) : 0;
+
+  // Cost from costs prop
+  const totalCost = costs?.totalCost;
+
+  // Location toggle
+  const toggleLoc = (loc) => {
+    setLocFilter(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(loc)) next.delete(loc); else next.add(loc);
       return next;
     });
   };
+  const locActive = (loc) => locFilter.size === 0 || locFilter.has(loc);
 
-  const handleDrop = (e) => {
-    e.preventDefault(); setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) onUpload(file);
+  // Loc colour mapping
+  const locColor = { US: US_COL, India: OFF_COL, Argentina: AR_COL };
+  const locCount = {
+    US: us,
+    India: staffing.india ?? 0,
+    Argentina: staffing.argentina ?? 0,
   };
 
-  const total    = staffing.total ?? 0;
-  const us       = staffing.us ?? 0;
-  const india    = staffing.india ?? 0;
-  const ar       = staffing.argentina ?? 0;
-  const offshore = india + ar;
-  const named    = staffing.named ?? total;
-  const tbd      = total - named;
-  const onPct    = total > 0 ? Math.round(us / total * 100) : 0;
-  const offPct   = 100 - onPct;
-  const priceMultiplier = margin < 100 ? 1 / (1 - margin / 100) : 1;
-
   return (
-    <div style={{
-      background: SIDEBAR_BG,
-      borderRight: `1px solid ${BORDER_COL}`,
-      display: "flex",
-      flexDirection: "column",
-      overflowY: "auto",
-      height: "100%",
-    }}>
+    <div style={{ background:BG_SIDEBAR, borderRight:`1px solid ${BORDER}`, display:"flex", flexDirection:"column", height:"100%", overflowY:"auto" }}>
 
       {/* Upload zone */}
       {!isLive ? (
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={e => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
           style={{
-            margin: "14px 12px 4px",
-            height: 192,
-            border: `1.5px dashed ${dragOver ? "#A100FF" : "rgba(161,0,255,0.35)"}`,
-            borderRadius: 12,
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", gap: 10,
-            background: dragOver ? "rgba(161,0,255,0.18)" : "rgba(161,0,255,0.07)",
-            transition: "all 0.15s",
-            flexShrink: 0,
+            margin:"14px 12px 0", height:180,
+            border:`1.5px dashed ${dragOver ? ACCENT : "rgba(161,0,255,0.35)"}`,
+            borderRadius:12, display:"flex", flexDirection:"column",
+            alignItems:"center", justifyContent:"center",
+            cursor:"pointer", gap:10, flexShrink:0,
+            background: dragOver ? "rgba(161,0,255,0.18)" : "rgba(161,0,255,0.06)",
+            transition:"all 0.15s",
           }}
         >
-          <i className="ti ti-file-spreadsheet" style={{ fontSize: 32, color: "#A100FF" }} />
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", textAlign: "center", lineHeight: 1.5 }}>
+          <i className="ti ti-file-spreadsheet" style={{ fontSize:30, color:ACCENT }} />
+          <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", textAlign:"center", lineHeight:1.5 }}>
             Drag and drop<br />or click to upload
           </div>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
-            .xlsx · .xls
-          </div>
-          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }}
-            onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }} />
+          <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)" }}>.xlsx · .xls</div>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }}
+            onChange={e => { const f=e.target.files?.[0]; if(f) onUpload(f); e.target.value=""; }} />
         </div>
       ) : (
-        <div style={{ margin: "14px 12px 4px", padding: "14px", background: "rgba(161,0,255,0.1)", border: "1px solid rgba(161,0,255,0.25)", borderRadius: 12, flexShrink: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.7, color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Active file</div>
-          <div style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 600, wordBreak: "break-all", lineHeight: 1.4, marginBottom: 10 }}>{storedName}</div>
-          {storedDate && (
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>
-              Saved {new Date(storedDate).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-            </div>
-          )}
-          <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ margin:"14px 12px 0", padding:14, background:"rgba(161,0,255,0.1)", border:"1px solid rgba(161,0,255,0.25)", borderRadius:12, flexShrink:0 }}>
+          <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.7, color:"rgba(255,255,255,0.4)", marginBottom:6 }}>Active file</div>
+          <div style={{ fontSize:12, color:TEXT_H, fontWeight:600, wordBreak:"break-all", lineHeight:1.4, marginBottom:storedDate?8:10 }}>{storedName}</div>
+          {storedDate && <div style={{ fontSize:10, color:TEXT_M, marginBottom:10 }}>
+            {new Date(storedDate).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" })}
+          </div>}
+          <div style={{ display:"flex", gap:6 }}>
             <button onClick={() => fileRef.current?.click()}
-              style={{ flex: 1, fontSize: 11, fontWeight: 600, padding: "6px 0", background: "rgba(161,0,255,0.2)", border: "1px solid rgba(161,0,255,0.4)", borderRadius: 6, color: "#C084FC", cursor: "pointer" }}>
+              style={{ flex:1, fontSize:11, fontWeight:600, padding:"6px 0", background:"rgba(161,0,255,0.2)", border:"1px solid rgba(161,0,255,0.4)", borderRadius:6, color:"#C084FC", cursor:"pointer" }}>
               Replace
             </button>
             <button onClick={onReset}
-              style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 0", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
+              style={{ flex:1, fontSize:11, padding:"6px 0", background:"rgba(255,255,255,0.05)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_B, cursor:"pointer" }}>
               Clear
             </button>
           </div>
-          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }}
-            onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ""; }} />
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }}
+            onChange={e => { const f=e.target.files?.[0]; if(f) onUpload(f); e.target.value=""; }} />
         </div>
       )}
 
-      {/* Divider */}
-      <div style={{ height: 1, background: BORDER_COL, margin: "8px 0 0" }} />
+      <div style={{ height:1, background:BORDER, margin:"12px 0 0", flexShrink:0 }} />
 
-      {/* Header */}
-      <div style={{ padding: "14px 18px 10px", borderBottom: `1px solid ${BORDER_COL}` }}>
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: ACCENT }}>Dashboard</div>
-        <div style={{ fontSize: 13, color: TEXT_SUB, marginTop: 4 }}>Click a section to expand</div>
-      </div>
-
-      {/* Resources */}
-      <SidebarSection id="resources" icon="👥" title="Resources" summary={fmtN(total) + " people"} expanded={expanded.has("resources")} onToggle={toggle}>
-        <Row label="Total headcount" value={fmtN(total)} />
-        <Row label="Onshore (US)" value={fmtN(us)} color={US_COL} />
-        <Row label="Offshore" value={fmtN(offshore)} color={OFF_COL} />
-        {india > 0 && <Row label="India" value={fmtN(india)} color={OFF_COL} indent />}
-        {ar > 0 && <Row label="Argentina" value={fmtN(ar)} color={AR_COL} indent />}
-        <Row label="Named" value={fmtN(named)} />
-        <Row label="TBD" value={fmtN(tbd)} />
-      </SidebarSection>
-
-      {/* On/Off Ratio */}
-      <SidebarSection id="ratio" icon="📊" title="On / Off Ratio" summary={`${onPct}% / ${offPct}%`} expanded={expanded.has("ratio")} onToggle={toggle}>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: TEXT_SUB, marginBottom: 6 }}>
-            <span>Onshore {onPct}%</span>
-            <span>Offshore {offPct}%</span>
-          </div>
-          <div style={{ height: 10, borderRadius: 5, background: "rgba(255,255,255,0.1)", display: "flex", overflow: "hidden" }}>
-            <div style={{ width: onPct + "%", background: US_COL, transition: "width 0.4s" }} />
-            {ar > 0 && <div style={{ width: (total > 0 ? ar / total * 100 : 0) + "%", background: AR_COL }} />}
-            <div style={{ flex: 1, background: OFF_COL }} />
-          </div>
+      {/* Location filter */}
+      <SbSection title="Location">
+        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          {["US","India","Argentina"].map(loc => {
+            const active = locActive(loc);
+            const color  = locColor[loc];
+            const count  = locCount[loc];
+            return (
+              <label key={loc} style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer", padding:"4px 0" }}>
+                <div
+                  onClick={() => toggleLoc(loc)}
+                  style={{
+                    width:14, height:14, borderRadius:3, flexShrink:0,
+                    background: active ? color : "transparent",
+                    border: `1.5px solid ${active ? color : "rgba(255,255,255,0.2)"}`,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    cursor:"pointer", transition:"all 0.15s",
+                  }}
+                >
+                  {active && <i className="ti ti-check" style={{ fontSize:9, color:"#000", fontWeight:700 }} />}
+                </div>
+                <span style={{ fontSize:12, color:active ? TEXT_H : TEXT_B, flex:1 }}>{loc}</span>
+                <span style={{ fontSize:11, color:TEXT_M }}>{count}</span>
+              </label>
+            );
+          })}
+          {locFilter.size > 0 && (
+            <button onClick={() => setLocFilter(new Set())}
+              style={{ fontSize:10, color:ACCENT, background:"none", border:"none", cursor:"pointer", textAlign:"left", padding:"2px 0", marginTop:2 }}>
+              Clear filter
+            </button>
+          )}
         </div>
-        <Row label="Onshore (US)" value={fmtN(us) + " · " + onPct + "%"} color={US_COL} />
-        <Row label="Offshore" value={fmtN(offshore) + " · " + offPct + "%"} color={OFF_COL} />
-        {india > 0 && <Row label="India" value={fmtN(india)} color={OFF_COL} indent />}
-        {ar > 0 && <Row label="Argentina" value={fmtN(ar)} color={AR_COL} indent />}
-      </SidebarSection>
+      </SbSection>
 
-      {/* Cost */}
-      <SidebarSection
-        id="cost"
-        icon="💰"
-        title="Programme Cost"
-        summary={costs ? fmtCost(costs.totalCost) : "—"}
-        expanded={expanded.has("cost")}
-        onToggle={toggle}
-      >
+      {/* Cost + margin */}
+      <SbSection title="Programme cost">
         {costs ? (
           <>
-            <Row label="Onshore cost" value={fmtCost(costs.onCost)} color={US_COL} />
-            <Row label="Offshore cost" value={fmtCost(costs.offCost)} color={OFF_COL} />
-            <Row label="Total cost" value={fmtCost(costs.totalCost)} />
-
-            {/* Margin input */}
-            <div style={{ marginTop: 14, padding: "12px 0 4px", borderTop: `1px solid ${BORDER_COL}` }}>
-              <div style={{ fontSize: 11, color: TEXT_SUB, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.6 }}>Target margin %</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="number" min="0" max="99" step="0.5"
-                  value={margin}
-                  onChange={e => setMargin(parseFloat(e.target.value) || 0)}
-                  style={{
-                    width: 70, padding: "6px 8px", fontSize: 18, fontWeight: 700,
-                    background: "rgba(255,255,255,0.08)", border: `1px solid ${BORDER_COL}`,
-                    borderRadius: 6, color: TEXT_PRIMARY, outline: "none",
-                    WebkitAppearance: "none",
-                  }}
-                />
-                <span style={{ fontSize: 13, color: TEXT_SUB }}>%</span>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+              <span style={{ fontSize:11, color:TEXT_B }}>Total</span>
+              <span style={{ fontSize:13, fontWeight:700, color:TEXT_H }}>{fmtCost(totalCost)}</span>
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+              <span style={{ fontSize:11, color:TEXT_M }}>Onshore</span>
+              <span style={{ fontSize:11, color:US_COL }}>{fmtCost(costs.onCost)}</span>
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:14 }}>
+              <span style={{ fontSize:11, color:TEXT_M }}>Offshore</span>
+              <span style={{ fontSize:11, color:OFF_COL }}>{fmtCost(costs.offCost)}</span>
+            </div>
+            <div style={{ borderTop:`1px solid ${BORDER}`, paddingTop:12 }}>
+              <div style={{ fontSize:10, color:TEXT_M, marginBottom:6, textTransform:"uppercase", letterSpacing:.5 }}>Target margin %</div>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                <input type="number" min="0" max="99" step="0.5" value={margin}
+                  onChange={e => setMargin(parseFloat(e.target.value)||0)}
+                  style={{ width:64, padding:"5px 8px", fontSize:16, fontWeight:700, background:"rgba(255,255,255,0.06)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_H, outline:"none" }} />
+                <span style={{ fontSize:12, color:TEXT_M }}>%</span>
               </div>
-              <div style={{ marginTop: 10 }}>
-                <Row label="Total price" value={fmtCost(costs.totalCost * priceMultiplier)} color={ACCENT} />
-              </div>
-              <div style={{ fontSize: 11, color: TEXT_SUB, marginTop: 6 }}>
-                = {fmtCost(costs.totalCost)} ÷ (1 − {margin.toFixed(1)}%)
+              <div style={{ display:"flex", justifyContent:"space-between" }}>
+                <span style={{ fontSize:11, color:TEXT_B }}>Total price</span>
+                <span style={{ fontSize:13, fontWeight:700, color:ACCENT }}>
+                  {fmtCost(totalCost / (1 - margin / 100))}
+                </span>
               </div>
             </div>
           </>
         ) : (
-          <div style={{ fontSize: 12, color: TEXT_SUB, padding: "4px 0 8px" }}>
-            Upload a staffing file to view cost breakdown and pricing.
-          </div>
+          <div style={{ fontSize:12, color:TEXT_M }}>Upload a file to see cost figures.</div>
         )}
-      </SidebarSection>
+      </SbSection>
+
+      {/* Quick insights */}
+      {total > 0 && (
+        <SbSection title="Quick insights">
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {largestGroup && (
+              <div>
+                <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.6, color:ACCENT, marginBottom:2 }}>Largest project</div>
+                <div style={{ fontSize:12, color:TEXT_H }}>{largestGroup.name}</div>
+                <div style={{ fontSize:10, color:TEXT_M }}>{largestGroup.people} resources</div>
+              </div>
+            )}
+            <div>
+              <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.6, color:tdbPct>20?WARNING_COL:SUCCESS_COL, marginBottom:2 }}>TBD exposure</div>
+              <div style={{ fontSize:12, color:TEXT_H }}>{tbd} unconfirmed</div>
+              <div style={{ fontSize:10, color:TEXT_M }}>{tdbPct}% of total workforce</div>
+            </div>
+            <div>
+              <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.6, color:TEXT_M, marginBottom:2 }}>Onshore / offshore</div>
+              <div style={{ fontSize:12, color:TEXT_H }}>{total > 0 ? Math.round(us/total*100) : 0}% US · {total > 0 ? Math.round(offshore/total*100) : 0}% offshore</div>
+            </div>
+          </div>
+        </SbSection>
+      )}
     </div>
   );
 }

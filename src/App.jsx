@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { STAFFING } from "./data/hardcoded.js";
 import { parseStaffingModel } from "./parsers/parseStaffingModel.js";
@@ -10,12 +10,18 @@ import Chatbot from "./components/Chatbot.jsx";
 
 const STORAGE_KEY = "staffing-v1";
 
+const BG_APP     = "#0F172A";
+const BG_SIDEBAR = "#080D18";
+const BORDER     = "#1E293B";
+const TEXT_B     = "#94A3B8";
+const TEXT_M     = "rgba(255,255,255,0.35)";
+
 const TABS = [
-  { id: "home",     label: "Home" },
-  { id: "groups",   label: "By Project" },
-  { id: "levels",   label: "By Level" },
-  { id: "pods",     label: "By Pod" },
-  { id: "pricing",  label: "Pricing" },
+  { id: "home",     label: "Executive summary" },
+  { id: "groups",   label: "Projects" },
+  { id: "levels",   label: "Staffing" },
+  { id: "pods",     label: "Pods" },
+  { id: "pricing",  label: "Cost & financials" },
   { id: "reinvent", label: "Reinvent" },
   { id: "help",     label: "Help" },
 ];
@@ -38,6 +44,7 @@ export default function App() {
   const [view, setView]               = useState("home");
   const [margin, setMargin]           = useState(23);
   const [sidebarWidth, setSidebarWidth] = useState(280);
+  const [locFilter, setLocFilter]     = useState(new Set());
   const resizing = useRef(false);
   const startX   = useRef(0);
   const startW   = useRef(0);
@@ -106,10 +113,24 @@ export default function App() {
   const staffing   = parsedStaffing?.staffing ?? STAFFING;
   const liveDetail = parsedStaffing?.detail   ?? null;
 
+  const filteredDetail = useMemo(() => {
+    if (!liveDetail) return null;
+    if (locFilter.size === 0) return liveDetail;
+    return liveDetail.filter(r => {
+      const onshore   = isOnshore(r.location);
+      const argentina = isArgentina(r.location);
+      const india     = !onshore && !argentina;
+      if (locFilter.has("US")        && onshore)    return true;
+      if (locFilter.has("India")     && india)       return true;
+      if (locFilter.has("Argentina") && argentina)   return true;
+      return false;
+    });
+  }, [liveDetail, locFilter]);
+
   // Spinner shown only during initial IndexedDB restore
   if (loading && !isLive && !parsedStaffing) {
     return (
-      <div style={{ minHeight:"100vh", background:"#F0F0F2", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ minHeight:"100vh", background:BG_APP, display:"flex", alignItems:"center", justifyContent:"center" }}>
         <div style={{ textAlign:"center", color:"#888" }}>
           <i className="ti ti-loader-2" style={{ fontSize:28, color:"#A100FF", display:"block", marginBottom:10 }} />
           <div style={{ fontSize:13 }}>Restoring last session…</div>
@@ -119,12 +140,12 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight:"100vh", background:"#F0F0F2", fontFamily:"Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", display:"flex", flexDirection:"column" }}>
+    <div style={{ minHeight:"100vh", background:BG_APP, fontFamily:"Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", display:"flex", flexDirection:"column" }}>
 
       {/* Navbar */}
       <div style={{
         position: "sticky", top: 0, zIndex: 100,
-        background: "#0A0A0A",
+        background: "#0A0A14",
         borderBottom: "2px solid #A100FF",
         padding: "0 28px",
         display: "flex", alignItems: "center", gap: 12, height: 52,
@@ -138,7 +159,7 @@ export default function App() {
           <span style={{
             fontSize:11, fontWeight:600, letterSpacing:0.3,
             color:"#16a34a", background:"#052e16",
-            border:"1px solid #166534",
+            border:`1px solid ${BORDER}`,
             borderRadius:20, padding:"3px 10px",
           }}>
             <span style={{ display:"inline-block", width:6, height:6, borderRadius:"50%", background:"#22c55e", marginRight:5, verticalAlign:1 }} />
@@ -149,7 +170,7 @@ export default function App() {
             fontSize:11, fontWeight:500, letterSpacing:0.4,
             color:"rgba(255,255,255,0.40)",
             background:"rgba(255,255,255,0.06)",
-            border:"1px solid rgba(255,255,255,0.12)",
+            border:`1px solid ${BORDER}`,
             borderRadius:20, padding:"3px 10px",
           }}>
             Sample data
@@ -160,8 +181,8 @@ export default function App() {
       {/* Tab sub-header */}
       <div style={{
         position: "sticky", top: 52, zIndex: 90,
-        background: "#FFFFFF",
-        borderBottom: "1px solid #E8E8E8",
+        background: BG_APP,
+        borderBottom: `1px solid ${BORDER}`,
         display: "flex", alignItems: "stretch", height: 44,
         flexShrink: 0,
       }}>
@@ -170,7 +191,7 @@ export default function App() {
             padding: "0 18px", height: "100%", border: "none", background: "none",
             cursor: "pointer", fontSize: 13, whiteSpace: "nowrap",
             fontWeight: view === tab.id ? 600 : 400,
-            color: view === tab.id ? "#A100FF" : "#555555",
+            color: view === tab.id ? "#A100FF" : TEXT_B,
             borderBottom: view === tab.id ? "2px solid #A100FF" : "2px solid transparent",
             transition: "color 0.15s",
           }}>{tab.label}</button>
@@ -180,11 +201,11 @@ export default function App() {
       {/* Main content: sidebar + content */}
       <div style={{ display: "flex", flexDirection: "row", flex: 1, overflow: "hidden", minHeight: 0 }}>
 
-        {/* Purple sidebar — always visible */}
+        {/* Sidebar — always visible */}
         <div style={{ width: sidebarWidth, minWidth: 200, maxWidth: 480, flexShrink: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <HomeSidebar
             staffing={staffing}
-            costs={liveDetail ? computeCosts(liveDetail) : null}
+            costs={filteredDetail ? computeCosts(filteredDetail) : null}
             margin={margin}
             setMargin={setMargin}
             isLive={isLive}
@@ -192,6 +213,10 @@ export default function App() {
             storedDate={storedDate}
             onUpload={handleUpload}
             onReset={handleReset}
+            liveDetail={filteredDetail}
+            locFilter={locFilter}
+            setLocFilter={setLocFilter}
+            allLocations={["US","India","Argentina"]}
           />
         </div>
 
@@ -208,7 +233,7 @@ export default function App() {
             loading={loading}
             storedName={storedName}
             storedDate={storedDate}
-            liveDetail={liveDetail}
+            liveDetail={filteredDetail}
             monthLabels={monthLabels}
             margin={margin}
             setMargin={setMargin}
@@ -220,16 +245,16 @@ export default function App() {
 
       {/* Footer — privacy notice */}
       <div style={{
-        borderTop: "1px solid #E8E8E8",
-        background: "#FFFFFF",
+        borderTop: `1px solid ${BORDER}`,
+        background: BG_SIDEBAR,
         padding: "12px 28px",
         display: "flex", alignItems: "center", gap: 8,
-        fontSize: 11, color: "#888888",
+        fontSize: 11, color: TEXT_M,
         flexShrink: 0,
       }}>
         <i className="ti ti-shield-lock" style={{ fontSize: 13, color: "#A100FF", flexShrink: 0 }} />
         <span>
-          <strong style={{ color: "#555555" }}>Privacy notice:</strong> Uploaded files are processed locally in your browser only. No data leaves your device or is stored by this application. Note: if you are using a private or incognito window, the file will not be remembered after you close or refresh the tab.
+          <strong style={{ color: TEXT_B }}>Privacy notice:</strong> Uploaded files are processed locally in your browser only. No data leaves your device or is stored by this application. Note: if you are using a private or incognito window, the file will not be remembered after you close or refresh the tab.
         </span>
       </div>
     </div>
@@ -239,6 +264,11 @@ export default function App() {
 function isOnshore(loc) {
   const u = (loc ?? "").toUpperCase();
   return u === "USA" || u === "US" || u.startsWith("UNITED STATES") || u === "ONSHORE";
+}
+
+function isArgentina(loc) {
+  const u = (loc ?? "").toUpperCase();
+  return u.startsWith("ARGENTINA") || u === "AR";
 }
 
 function computeCosts(detail) {

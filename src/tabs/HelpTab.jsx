@@ -1,4 +1,9 @@
 const ACCENT = "#A100FF";
+const BG_CARD = "#111827";
+const BORDER  = "#1E293B";
+const TEXT_H  = "#F8FAFC";
+const TEXT_B  = "#94A3B8";
+const TEXT_M  = "rgba(255,255,255,0.35)";
 
 const COLUMNS = [
   { col:"A / Program",       header:"program",         required:false, description:"Programme name — same value in all rows" },
@@ -35,40 +40,40 @@ export default function HelpTab() {
     <div style={{ display:"flex", flexDirection:"column", gap:24, maxWidth:900 }}>
 
       <div>
-        <h2 style={{ fontSize:20, fontWeight:700, marginBottom:4 }}>File format &amp; column reference</h2>
-        <p style={{ fontSize:13, color:"#666", lineHeight:1.7 }}>
-          Upload any Excel (.xlsx / .xls) file with a sheet named exactly <strong>Staffing Plan</strong>.
+        <h2 style={{ fontSize:20, fontWeight:700, marginBottom:4, color:TEXT_H }}>File format &amp; column reference</h2>
+        <p style={{ fontSize:13, color:TEXT_B, lineHeight:1.7 }}>
+          Upload any Excel (.xlsx / .xls) file with a sheet named exactly <strong style={{ color:TEXT_H }}>Staffing Plan</strong>.
           Columns are detected by header name — they can be in any order.
           Row 1 = programme title, Row 2 = column headers, Row 3 onwards = data.
         </p>
       </div>
 
       {/* Column table */}
-      <div style={{ background:"#FFF", border:"1px solid #E8E8E8", borderRadius:10, overflow:"hidden" }}>
-        <div style={{ padding:"12px 16px", background:"#FAFAFA", borderBottom:"1px solid #F0F0F0", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:"#888" }}>
+      <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, overflow:"hidden" }}>
+        <div style={{ padding:"12px 16px", background:"#0F172A", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
           Column reference
         </div>
         <table style={{ width:"100%", borderCollapse:"collapse" }}>
           <thead>
-            <tr style={{ background:"#FAFAFA" }}>
+            <tr style={{ background:"#0F172A" }}>
               {["Template position","Header name","Required","Description"].map((h,i) => (
-                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:"#999", textTransform:"uppercase", letterSpacing:0.5, borderBottom:"1px solid #F0F0F0" }}>{h}</th>
+                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:TEXT_M, textTransform:"uppercase", letterSpacing:0.5, borderBottom:`1px solid ${BORDER}` }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {COLUMNS.map((c, i) => (
-              <tr key={i} style={{ background: i%2===1 ? "#FAFAFA" : "#FFF" }}>
-                <td style={{ padding:"10px 14px", fontSize:12, color:"#888", whiteSpace:"nowrap" }}>{c.col}</td>
+              <tr key={i} style={{ background: i%2===1 ? "rgba(255,255,255,0.03)" : "transparent" }}>
+                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B, whiteSpace:"nowrap" }}>{c.col}</td>
                 <td style={{ padding:"10px 14px" }}>
-                  <code style={{ background:"#F2E6FF", color:ACCENT, padding:"2px 7px", borderRadius:4, fontSize:12, fontWeight:600 }}>{c.header}</code>
+                  <code style={{ background:"rgba(161,0,255,0.2)", color:"#C084FC", padding:"2px 7px", borderRadius:4, fontSize:12, fontWeight:600 }}>{c.header}</code>
                 </td>
                 <td style={{ padding:"10px 14px" }}>
                   {c.required
-                    ? <span style={{ color:"#16a34a", fontWeight:600, fontSize:12 }}>✓ Required</span>
-                    : <span style={{ color:"#AAA", fontSize:12 }}>Optional</span>}
+                    ? <span style={{ color:"#10B981", fontWeight:600, fontSize:12 }}>✓ Required</span>
+                    : <span style={{ color:TEXT_M, fontSize:12 }}>Optional</span>}
                 </td>
-                <td style={{ padding:"10px 14px", fontSize:12, color:"#444", lineHeight:1.5 }}>{c.description}</td>
+                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B, lineHeight:1.5 }}>{c.description}</td>
               </tr>
             ))}
           </tbody>
@@ -76,24 +81,24 @@ export default function HelpTab() {
       </div>
 
       {/* Location values */}
-      <div style={{ background:"#FFF", border:"1px solid #E8E8E8", borderRadius:10, overflow:"hidden" }}>
-        <div style={{ padding:"12px 16px", background:"#FAFAFA", borderBottom:"1px solid #F0F0F0", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:"#888" }}>
+      <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, overflow:"hidden" }}>
+        <div style={{ padding:"12px 16px", background:"#0F172A", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
           Location values
         </div>
         <table style={{ width:"100%", borderCollapse:"collapse" }}>
           <thead>
             <tr>
               {["Accepted values","Type","Hours/day"].map((h,i) => (
-                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:"#999", textTransform:"uppercase", letterSpacing:0.5, borderBottom:"1px solid #F0F0F0", background:"#FAFAFA" }}>{h}</th>
+                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:TEXT_M, textTransform:"uppercase", letterSpacing:0.5, borderBottom:`1px solid ${BORDER}`, background:"#0F172A" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {LOCATIONS.map((l, i) => (
-              <tr key={i} style={{ background: i%2===1 ? "#FAFAFA" : "#FFF" }}>
-                <td style={{ padding:"10px 14px", fontSize:12 }}><code style={{ fontSize:12 }}>{l.value}</code></td>
-                <td style={{ padding:"10px 14px", fontSize:12, fontWeight:600, color: l.type.startsWith("Offshore") ? "#F97316" : "#2563EB" }}>{l.type}</td>
-                <td style={{ padding:"10px 14px", fontSize:12, color:"#444" }}>{l.hrs}</td>
+              <tr key={i} style={{ background: i%2===1 ? "rgba(255,255,255,0.03)" : "transparent" }}>
+                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B }}><code style={{ fontSize:12, background:"rgba(255,255,255,0.06)", color:TEXT_H }}>{l.value}</code></td>
+                <td style={{ padding:"10px 14px", fontSize:12, fontWeight:600, color: l.type.startsWith("Offshore") ? "#FB923C" : "#60A5FA" }}>{l.type}</td>
+                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B }}>{l.hrs}</td>
               </tr>
             ))}
           </tbody>
@@ -101,43 +106,43 @@ export default function HelpTab() {
       </div>
 
       {/* Level bands */}
-      <div style={{ background:"#FFF", border:"1px solid #E8E8E8", borderRadius:10, padding:"16px" }}>
-        <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:"#888", marginBottom:12 }}>Valid level bands</div>
+      <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"16px" }}>
+        <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M, marginBottom:12 }}>Valid level bands</div>
         <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
           {LEVELS.map(l => (
-            <code key={l} style={{ background:"#F2E6FF", color:ACCENT, padding:"4px 10px", borderRadius:6, fontSize:12 }}>{l}</code>
+            <code key={l} style={{ background:"rgba(161,0,255,0.2)", color:"#C084FC", padding:"4px 10px", borderRadius:6, fontSize:12 }}>{l}</code>
           ))}
         </div>
       </div>
 
       {/* Month format */}
-      <div style={{ background:"#FFF", border:"1px solid #E8E8E8", borderRadius:10, padding:"16px" }}>
-        <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:"#888", marginBottom:8 }}>Month column format</div>
-        <p style={{ fontSize:13, color:"#444", lineHeight:1.7, marginBottom:10 }}>
+      <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, padding:"16px" }}>
+        <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M, marginBottom:8 }}>Month column format</div>
+        <p style={{ fontSize:13, color:TEXT_B, lineHeight:1.7, marginBottom:10 }}>
           Month columns are auto-detected by header name. Both formats are supported and can be mixed. Up to 24 months.
         </p>
         <div style={{ display:"flex", gap:16 }}>
           <div>
-            <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>Numeric</div>
+            <div style={{ fontSize:11, color:TEXT_M, marginBottom:6 }}>Numeric</div>
             <div style={{ display:"flex", gap:6 }}>
-              {["M1","M2","M3","...","M24"].map(m => <code key={m} style={{ background:"#F5F5F5", padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
+              {["M1","M2","M3","...","M24"].map(m => <code key={m} style={{ background:"rgba(255,255,255,0.06)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
             </div>
           </div>
           <div>
-            <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>Named</div>
+            <div style={{ fontSize:11, color:TEXT_M, marginBottom:6 }}>Named</div>
             <div style={{ display:"flex", gap:6 }}>
-              {["Jun-24","Jul-24","Aug-24","...","May-26"].map(m => <code key={m} style={{ background:"#F5F5F5", padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
+              {["Jun-24","Jul-24","Aug-24","...","May-26"].map(m => <code key={m} style={{ background:"rgba(255,255,255,0.06)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
             </div>
           </div>
         </div>
       </div>
 
       {/* Cost formula */}
-      <div style={{ background:"#F2E6FF", border:"1px solid #D9B3FF", borderRadius:10, padding:"16px" }}>
+      <div style={{ background:"rgba(161,0,255,0.15)", border:"1px solid rgba(161,0,255,0.35)", borderRadius:10, padding:"16px" }}>
         <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:ACCENT, marginBottom:8 }}>Cost calculation formula</div>
-        <code style={{ fontSize:14, color:"#333", display:"block", marginBottom:8 }}>Cost = LCR ($/hr) × Total Days × hours per day</code>
-        <div style={{ fontSize:13, color:"#555" }}>
-          Onshore (US): <strong>8 hours/day</strong> &nbsp;·&nbsp; Offshore (India / AR / other): <strong>9 hours/day</strong><br />
+        <code style={{ fontSize:14, color:TEXT_H, display:"block", marginBottom:8, background:"transparent" }}>Cost = LCR ($/hr) × Total Days × hours per day</code>
+        <div style={{ fontSize:13, color:TEXT_B }}>
+          Onshore (US): <strong style={{ color:TEXT_H }}>8 hours/day</strong> &nbsp;·&nbsp; Offshore (India / AR / other): <strong style={{ color:TEXT_H }}>9 hours/day</strong><br />
           Price = Total Cost ÷ (1 − margin%)
         </div>
       </div>
