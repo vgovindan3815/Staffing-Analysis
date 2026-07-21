@@ -6,13 +6,12 @@ import {
   AreaChart, Area,
 } from "recharts";
 
-// Dark theme tokens
-const BG_CARD     = "#111827";
-const BG_CARD2    = "#1a2234";
-const BORDER      = "#1E293B";
-const TEXT_H      = "#F8FAFC";
-const TEXT_B      = "#94A3B8";
-const TEXT_M      = "rgba(255,255,255,0.35)";
+// Theme tokens (CSS custom properties)
+const BG_CARD     = "var(--bg-card)";
+const BORDER      = "var(--border)";
+const TEXT_H      = "var(--text-h)";
+const TEXT_B      = "var(--text-b)";
+const TEXT_M      = "var(--text-m)";
 
 const US_COL      = "#60A5FA";
 const OFF_COL     = "#FB923C";
@@ -26,7 +25,7 @@ const WARNING_COL = "#F59E0B";
 const CARD         = { background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:12, padding:16 };
 const SECTION_LABEL = { fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.8, color:TEXT_M, marginBottom:12 };
 const CHART_LABEL   = { fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:0.7, color:TEXT_M, marginBottom:10 };
-const TT_STYLE      = { fontSize:11, background:BG_CARD2, border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_H };
+const TT_STYLE      = { fontSize:11, background:"var(--tooltip-bg)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_H };
 
 function isOnshore(loc) {
   const u = (loc ?? "").toUpperCase();
@@ -203,11 +202,11 @@ function LevelMixBar({ staffing }) {
       <div style={CHART_LABEL}>Level mix (headcount)</div>
       <ResponsiveContainer width="100%" height={Math.max(160, data.length * 28 + 30)}>
         <BarChart data={data} layout="vertical" margin={{ top:4, right:20, left:4, bottom:4 }} barSize={10}>
-          <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-          <XAxis type="number" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} />
-          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:TEXT_B }} axisLine={false} tickLine={false} width={50} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} />
+          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:"var(--text-b)" }} axisLine={false} tickLine={false} width={50} />
           <Tooltip formatter={(v, name) => [fmtN(v) + " FTE", name]} contentStyle={TT_STYLE} />
-          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:TEXT_B }} />
+          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:"var(--text-b)" }} />
           <Bar dataKey="on"  name="Onshore"  stackId="a" fill={US_COL}  radius={[0,0,0,0]} />
           <Bar dataKey="off" name="Offshore" stackId="a" fill={OFF_COL} radius={[0,3,3,0]} />
         </BarChart>
@@ -226,9 +225,9 @@ function GroupCostBar({ detail }) {
       <div style={CHART_LABEL}>Cost by project group</div>
       <ResponsiveContainer width="100%" height={Math.max(180, data.length * 26 + 30)}>
         <BarChart data={data} layout="vertical" margin={{ top:4, right:20, left:4, bottom:4 }} barSize={10}>
-          <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-          <XAxis type="number" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} tickFormatter={costTick} />
-          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:TEXT_B }} axisLine={false} tickLine={false} width={110} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} tickFormatter={costTick} />
+          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:"var(--text-b)" }} axisLine={false} tickLine={false} width={110} />
           <Tooltip formatter={v => [fmtCost(v), "Est. cost"]} contentStyle={TT_STYLE} />
           <Bar dataKey="cost" name="Est. cost" fill={US_COL} radius={[0,3,3,0]} />
         </BarChart>
@@ -247,9 +246,9 @@ function PodCostBar({ detail }) {
       <div style={CHART_LABEL}>Top 10 pods by cost</div>
       <ResponsiveContainer width="100%" height={Math.max(180, data.length * 26 + 30)}>
         <BarChart data={data} layout="vertical" margin={{ top:4, right:20, left:4, bottom:4 }} barSize={10}>
-          <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-          <XAxis type="number" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} tickFormatter={costTick} />
-          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:TEXT_B }} axisLine={false} tickLine={false} width={110} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} tickFormatter={costTick} />
+          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:"var(--text-b)" }} axisLine={false} tickLine={false} width={110} />
           <Tooltip formatter={v => [fmtCost(v), "Est. cost"]} contentStyle={TT_STYLE} />
           <Bar dataKey="cost" name="Est. cost" fill={POD_COL} radius={[0,3,3,0]} />
         </BarChart>
@@ -277,11 +276,11 @@ function LCRByLevel({ staffing }) {
       <div style={CHART_LABEL}>Blended LCR by level</div>
       <ResponsiveContainer width="100%" height={Math.max(160, data.length * 28 + 30)}>
         <BarChart data={data} layout="vertical" margin={{ top:4, right:20, left:4, bottom:4 }} barSize={8}>
-          <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
-          <XAxis type="number" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} tickFormatter={rateTick} />
-          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:TEXT_B }} axisLine={false} tickLine={false} width={50} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} tickFormatter={rateTick} />
+          <YAxis type="category" dataKey="name" tick={{ fontSize:9, fill:"var(--text-b)" }} axisLine={false} tickLine={false} width={50} />
           <Tooltip formatter={(v, name) => ["$" + v.toFixed(2) + "/hr", name]} contentStyle={TT_STYLE} />
-          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:TEXT_B }} />
+          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:"var(--text-b)" }} />
           <Bar dataKey="onshore"  name="Onshore LCR"  fill={US_COL}  radius={[0,3,3,0]} />
           <Bar dataKey="offshore" name="Offshore LCR" fill={OFF_COL} radius={[0,3,3,0]} />
         </BarChart>
@@ -299,13 +298,13 @@ function MonthlyCostRamp({ detail, monthLabels }) {
       <div style={CHART_LABEL}>Monthly cost estimate (approx.)</div>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={data} margin={{ top:4, right:4, left:-10, bottom:0 }} barSize={data.length > 16 ? 7 : 10}>
-          <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false}
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false}
             interval={data.length > 12 ? 1 : 0} angle={data.length > 16 ? -35 : 0}
             textAnchor={data.length > 16 ? "end" : "middle"} height={data.length > 16 ? 40 : 20} />
-          <YAxis tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} tickFormatter={mTick} width={52} />
+          <YAxis tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} tickFormatter={mTick} width={52} />
           <Tooltip formatter={(v, name) => ["$" + Number(v).toFixed(2) + "M", name]} contentStyle={TT_STYLE} />
-          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:TEXT_B }} />
+          <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:"var(--text-b)" }} />
           <Bar dataKey="on"  name="Onshore"  stackId="a" fill={US_COL}  radius={[0,0,0,0]} />
           <Bar dataKey="off" name="Offshore" stackId="a" fill={OFF_COL} radius={[3,3,0,0]} />
         </BarChart>
@@ -421,13 +420,13 @@ export default function HomeTab({ staffing, liveDetail, monthLabels }) {
           <div style={CHART_LABEL}>Monthly headcount ramp (FTE)</div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={monthlyData} margin={{ top:4, right:4, left:-22, bottom:0 }} barSize={monthlyData.length > 16 ? 7 : 10}>
-              <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false}
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false}
                 interval={monthlyData.length > 12 ? 1 : 0} angle={monthlyData.length > 16 ? -35 : 0}
                 textAnchor={monthlyData.length > 16 ? "end" : "middle"} height={monthlyData.length > 16 ? 40 : 20} />
-              <YAxis tick={{ fontSize:9, fill:TEXT_M }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize:9, fill:"var(--chart-tick)" }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(v, name) => [v.toFixed(1) + " FTE", name]} contentStyle={TT_STYLE} />
-              <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:TEXT_B }} />
+              <Legend wrapperStyle={{ fontSize:10, paddingTop:4, color:"var(--text-b)" }} />
               <Bar dataKey="on"  name="Onshore"  stackId="a" fill={US_COL}  radius={[0,0,0,0]} />
               <Bar dataKey="off" name="Offshore" stackId="a" fill={OFF_COL} radius={[3,3,0,0]} />
             </BarChart>

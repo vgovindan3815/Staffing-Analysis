@@ -158,8 +158,8 @@ function PersonDetailView({ entityType, entityName, levelBand, locationKey, live
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
       {/* Breadcrumb */}
-      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, color:"#94A3B8", flexWrap:"wrap" }}>
-        <button onClick={() => onBack("top")} style={{ background:"none", border:"none", cursor:"pointer", color:"#94A3B8", fontSize:13, padding:0 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, color:"var(--text-b)", flexWrap:"wrap" }}>
+        <button onClick={() => onBack("top")} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--text-b)", fontSize:13, padding:0 }}>
           <i className="ti ti-arrow-left" style={{ fontSize:13, marginRight:4 }} />
           Pricing
         </button>
@@ -171,16 +171,16 @@ function PersonDetailView({ entityType, entityName, levelBand, locationKey, live
         </>)}
         {levelBand && (<>
           <span>/</span>
-          <span style={{ color:"#F8FAFC", fontWeight:600 }}>
+          <span style={{ color:"var(--text-h)", fontWeight:600 }}>
             <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:LEVEL_COL[levelBand]||TEAL, marginRight:5, verticalAlign:1 }} />
             {levelBand}
           </span>
         </>)}
-        <span style={{ marginLeft:8, fontSize:12, color:"#94A3B8" }}>— {rows.length} resource{rows.length !== 1 ? "s" : ""}</span>
+        <span style={{ marginLeft:8, fontSize:12, color:"var(--text-b)" }}>— {rows.length} resource{rows.length !== 1 ? "s" : ""}</span>
       </div>
 
       {rows.length === 0 ? (
-        <div style={{ ...s.card, padding:24, textAlign:"center", color:"#94A3B8", fontSize:13 }}>
+        <div style={{ ...s.card, padding:24, textAlign:"center", color:"var(--text-b)", fontSize:13 }}>
           No individual rows found for this combination.
         </div>
       ) : (
@@ -201,13 +201,13 @@ function PersonDetailView({ entityType, entityName, levelBand, locationKey, live
               </thead>
               <tbody>
                 {rows.map((r, idx) => (
-                  <tr key={idx} style={{ background: idx%2===1 ? "rgba(255,255,255,0.03)" : undefined }}>
+                  <tr key={idx} style={{ background: idx%2===1 ? "var(--row-alt)" : undefined }}>
                     <td style={{ ...s.td, fontSize:12, whiteSpace:"nowrap" }}>{r.group}</td>
                     <td style={{ ...s.td, fontSize:12, whiteSpace:"nowrap" }}>{r.pod}</td>
                     <td style={{ ...s.td, fontSize:12 }}>{r.role}</td>
                     <td style={{ ...s.td, fontSize:12, color:locColor(r.location), fontWeight:500, whiteSpace:"nowrap" }}>{r.location}</td>
-                    <td style={{ ...s.td, fontSize:12, fontFamily:"var(--font-mono)", color:"#94A3B8" }}>
-                      {r.eid ?? <span style={{ color:"rgba(255,255,255,0.25)" }}>TBD</span>}
+                    <td style={{ ...s.td, fontSize:12, fontFamily:"var(--font-mono)", color:"var(--text-b)" }}>
+                      {r.eid ?? <span style={{ color:"var(--text-m)" }}>TBD</span>}
                     </td>
                     <td style={{ ...s.td, fontSize:12 }}>
                       <span style={{ display:"inline-block", width:7, height:7, borderRadius:"50%", background:LEVEL_COL[r.level]||TEAL, marginRight:5, verticalAlign:1 }} />
@@ -276,7 +276,7 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
 
     return (
       <div style={{ ...s.card, overflow:"hidden" }}>
-        <div style={{ padding:"8px 14px", borderBottom:"1px solid #1E293B", fontSize:12, fontWeight:600,
+        <div style={{ padding:"8px 14px", borderBottom:"1px solid var(--border)", fontSize:12, fontWeight:600,
           textTransform:"uppercase", letterSpacing:0.5, color }}>
           {title}
         </div>
@@ -300,25 +300,25 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
               return (
                 <tr key={l.band} style={{ cursor:"pointer" }}
                   onClick={() => setPersonView({ band: l.band, locationKey })}
-                  onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+                  onMouseEnter={e => e.currentTarget.style.background="var(--row-hover)"}
                   onMouseLeave={e => e.currentTarget.style.background=""}>
                   <td style={{ ...s.td, fontSize:13 }}>
                     <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%",
                       background:LEVEL_COL[l.band]||TEAL, marginRight:8, verticalAlign:1 }} />
                     {l.band}
                   </td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:13, fontWeight:500, color:"#94A3B8" }}>{fmtHr(bill)}</td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:13, fontWeight:500, color:"var(--text-b)" }}>{fmtHr(bill)}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13 }}>{Math.round(lPpl)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#94A3B8" }}>{fmtN(Math.round(days))}</td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"var(--text-b)" }}>{fmtN(Math.round(days))}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13 }}>{fmtM(cost)}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#A100FF", fontWeight:600 }}>{fmtM(cost * price)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"rgba(255,255,255,0.2)" }}><i className="ti ti-chevron-right" /></td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"var(--text-m)" }}><i className="ti ti-chevron-right" /></td>
                 </tr>
               );
             })}
-            <tr style={{ background:"rgba(255,255,255,0.03)" }}>
+            <tr style={{ background:"var(--row-alt)" }}>
               <td style={{ ...s.td, fontWeight:600, fontSize:13 }}>Subtotal</td>
-              <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#94A3B8" }}>blended</td>
+              <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"var(--text-b)" }}>blended</td>
               <td style={{ ...s.td, ...s.tdR, fontWeight:600, fontSize:13 }}>
                 {rows.reduce((a,l) => a + (locationKey==="us" ? (l.us??0) : (l.india??0)+(l.ar??0)), 0)}
               </td>
@@ -336,26 +336,26 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       {/* Breadcrumb */}
-      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, color:"#94A3B8" }}>
-        <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:"#94A3B8", fontSize:13, padding:0 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, color:"var(--text-b)" }}>
+        <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--text-b)", fontSize:13, padding:0 }}>
           <i className="ti ti-arrow-left" style={{ fontSize:13, marginRight:4 }} />
           Pricing
         </button>
         <span>/</span>
-        <span style={{ color:"#F8FAFC", fontWeight:600 }}>
+        <span style={{ color:"var(--text-h)", fontWeight:600 }}>
           <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%",
             background:GROUP_COL[groupName]||TEAL, marginRight:6, verticalAlign:1 }} />
           {groupName}
         </span>
-        <span style={{ marginLeft:8, fontSize:12, color:"#94A3B8" }}>— click a level to view individual resources</span>
+        <span style={{ marginLeft:8, fontSize:12, color:"var(--text-b)" }}>— click a level to view individual resources</span>
       </div>
 
       {/* Summary strip */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
         {[
-          { label:"Total cost", value:fmtM(totalCost), color:"#F8FAFC" },
+          { label:"Total cost", value:fmtM(totalCost), color:"var(--text-h)" },
           { label:"Price (" + margin.toFixed(1) + "% margin)", value:fmtM(totalCost * price), color:"#A100FF" },
-          { label:"On / Off split", value:`${fmtM(onCost)} / ${fmtM(offCost)}`, color:"#94A3B8" },
+          { label:"On / Off split", value:`${fmtM(onCost)} / ${fmtM(offCost)}`, color:"var(--text-b)" },
         ].map(k => (
           <div key={k.label} style={{ ...s.kpi }}>
             <div style={s.kpiLabel}>{k.label}</div>
@@ -458,7 +458,7 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
   const KPI = ({ label, value, sub, accent }) => (
     <div style={{ ...s.kpi, borderTop: accent ? "3px solid #A100FF" : "3px solid transparent" }}>
       <div style={s.kpiLabel}>{label}</div>
-      <div style={{ fontSize:22, fontWeight:700, color: accent ? "#A100FF" : "#F8FAFC", marginBottom:2 }}>{value}</div>
+      <div style={{ fontSize:22, fontWeight:700, color: accent ? "#A100FF" : "var(--text-h)", marginBottom:2 }}>{value}</div>
       {sub && <div style={s.kpiSub}>{sub}</div>}
     </div>
   );
@@ -479,7 +479,7 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
 
     return (
       <div style={{ ...s.card, overflow:"hidden" }}>
-        <div style={{ padding:"8px 14px", borderBottom:"1px solid #1E293B",
+        <div style={{ padding:"8px 14px", borderBottom:"1px solid var(--border)",
           fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:0.5, color }}>
           {title}
         </div>
@@ -507,25 +507,25 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
                     backLabel: null,
                     parent: null,
                   })}
-                  onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+                  onMouseEnter={e => e.currentTarget.style.background="var(--row-hover)"}
                   onMouseLeave={e => e.currentTarget.style.background=""}>
                   <td style={{ ...s.td, fontSize:13 }}>
                     <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%",
                       background:LEVEL_COL[l.band]||TEAL, marginRight:8, verticalAlign:1 }} />
                     {l.band}
                   </td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:13, fontWeight:500, color:"#94A3B8" }}>{fmtHr(bill)}</td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:13, fontWeight:500, color:"var(--text-b)" }}>{fmtHr(bill)}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13 }}>{Math.round(lPpl)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#94A3B8" }}>{fmtN(Math.round(days))}</td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"var(--text-b)" }}>{fmtN(Math.round(days))}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13 }}>{fmtM(cost)}</td>
                   <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#A100FF", fontWeight:600 }}>{fmtM(cost * priceMultiplier)}</td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"rgba(255,255,255,0.2)" }}><i className="ti ti-chevron-right" /></td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"var(--text-m)" }}><i className="ti ti-chevron-right" /></td>
                 </tr>
               );
             })}
-            <tr style={{ background:"rgba(255,255,255,0.03)" }}>
+            <tr style={{ background:"var(--row-alt)" }}>
               <td style={{ ...s.td, fontWeight:600, fontSize:13 }}>Subtotal</td>
-              <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#94A3B8" }}>blended</td>
+              <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"var(--text-b)" }}>blended</td>
               <td style={{ ...s.td, ...s.tdR, fontWeight:600, fontSize:13 }}>
                 {rows.reduce((a,l) => a + (locationKey==="us" ? (l.us??0) : (l.india??0)+(l.ar??0)), 0)}
               </td>
@@ -550,9 +550,9 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
         <KPI label="Overall blended LCR"  value={fmtHr(blended)} sub="weighted by staffed days" accent />
 
         {/* Margin input + derived price */}
-        <div style={{ background:"#111827", border:"1px solid #1E293B", borderRadius:8,
+        <div style={{ background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:8,
           padding:"10px 14px", minWidth:220 }}>
-          <div style={{ fontSize:11, color:"#94A3B8", textTransform:"uppercase", letterSpacing:0.4, marginBottom:6 }}>
+          <div style={{ fontSize:11, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.4, marginBottom:6 }}>
             Target margin %
           </div>
           <input
@@ -560,16 +560,16 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
             value={margin}
             onChange={e => setMargin(parseFloat(e.target.value) || 0)}
             style={{ width:"100%", padding:"6px 10px", fontSize:18, fontWeight:700,
-              border:"1px solid #1E293B", borderRadius:6, color:"#F8FAFC",
-              background:"rgba(255,255,255,0.06)", outline:"none", marginBottom:8 }}
+              border:"1px solid var(--border)", borderRadius:6, color:"var(--text-h)",
+              background:"var(--input-bg)", outline:"none", marginBottom:8 }}
           />
-          <div style={{ fontSize:11, color:"#94A3B8", textTransform:"uppercase", letterSpacing:0.4, marginBottom:3 }}>
+          <div style={{ fontSize:11, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.4, marginBottom:3 }}>
             Derived price/hr
           </div>
           <div style={{ fontSize:22, fontWeight:700, color:"#A100FF" }}>
             {fmtHr(priceHr)}
           </div>
-          <div style={{ fontSize:11, color:"#94A3B8", marginTop:2 }}>
+          <div style={{ fontSize:11, color:"var(--text-b)", marginTop:2 }}>
             = {fmtHr(blended)} ÷ (1 − {margin.toFixed(1)}%)
           </div>
         </div>
@@ -601,9 +601,9 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
 
       {/* ── Project (group) level table ── */}
       <div>
-        <div style={{ fontSize:14, fontWeight:700, marginBottom:10, color:"#F8FAFC" }}>
+        <div style={{ fontSize:14, fontWeight:700, marginBottom:10, color:"var(--text-h)" }}>
           Pricing by role group
-          <span style={{ fontSize:12, fontWeight:400, color:"#94A3B8", marginLeft:10 }}>click a row to drill into level detail</span>
+          <span style={{ fontSize:12, fontWeight:400, color:"var(--text-b)", marginLeft:10 }}>click a row to drill into level detail</span>
         </div>
         <div style={{ ...s.card, overflow:"hidden" }}>
           <table style={s.tbl}>
@@ -619,7 +619,7 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
               {groupRows.map(g => (
                 <tr key={g.name} style={{ cursor:"pointer" }}
                   onClick={() => setDrill({ type:"group", name:g.name, levels:g.levels })}
-                  onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+                  onMouseEnter={e => e.currentTarget.style.background="var(--row-hover)"}
                   onMouseLeave={e => e.currentTarget.style.background=""}>
                   <td style={{ ...s.td, fontSize:13 }}>
                     <span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%",
@@ -635,10 +635,10 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
                   <td style={{ ...s.td, ...s.tdR, fontSize:13, color:"#A100FF", fontWeight:700 }}>
                     {fmtM(g.totalCost * priceMultiplier)}
                   </td>
-                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"rgba(255,255,255,0.2)" }}><i className="ti ti-chevron-right" /></td>
+                  <td style={{ ...s.td, ...s.tdR, fontSize:12, color:"var(--text-m)" }}><i className="ti ti-chevron-right" /></td>
                 </tr>
               ))}
-              <tr style={{ background:"rgba(255,255,255,0.03)" }}>
+              <tr style={{ background:"var(--row-alt)" }}>
                 <td style={{ ...s.td, fontWeight:700, fontSize:13 }}>Total</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{staffing.us}</td>
                 <td style={{ ...s.td, ...s.tdR, fontWeight:700, fontSize:13 }}>{(staffing.india ?? 0) + (staffing.argentina ?? 0)}</td>
@@ -656,9 +656,9 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
 
       {/* ── Bottom: Onshore | Offshore level tables ── */}
       <div>
-        <div style={{ fontSize:14, fontWeight:700, marginBottom:10, color:"#F8FAFC" }}>
+        <div style={{ fontSize:14, fontWeight:700, marginBottom:10, color:"var(--text-h)" }}>
           Pricing by level
-          <span style={{ fontSize:12, fontWeight:400, color:"#94A3B8", marginLeft:10 }}>click a level to view individual resources</span>
+          <span style={{ fontSize:12, fontWeight:400, color:"var(--text-b)", marginLeft:10 }}>click a level to view individual resources</span>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
           <LevelBottomTable title="Onshore (US)"          color={US_COL}  rows={onLevels}  locationKey="us" />

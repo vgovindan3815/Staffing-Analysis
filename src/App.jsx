@@ -10,11 +10,11 @@ import Chatbot from "./components/Chatbot.jsx";
 
 const STORAGE_KEY = "staffing-v1";
 
-const BG_APP     = "#0F172A";
-const BG_SIDEBAR = "#080D18";
-const BORDER     = "#1E293B";
-const TEXT_B     = "#94A3B8";
-const TEXT_M     = "rgba(255,255,255,0.35)";
+const BG_APP     = "var(--bg-app)";
+const BG_SIDEBAR = "var(--bg-sidebar)";
+const BORDER     = "var(--border)";
+const TEXT_B     = "var(--text-b)";
+const TEXT_M     = "var(--text-m)";
 
 const TABS = [
   { id: "home",     label: "Executive summary" },
@@ -45,9 +45,15 @@ export default function App() {
   const [margin, setMargin]           = useState(23);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [locFilter, setLocFilter]     = useState(new Set());
+  const [theme, setTheme]             = useState(() => localStorage.getItem('sa-theme') || 'dark');
   const resizing = useRef(false);
   const startX   = useRef(0);
   const startW   = useRef(0);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sa-theme', theme);
+  }, [theme]);
 
   // On mount: try to restore previously uploaded file from IndexedDB
   useEffect(() => {
@@ -155,6 +161,23 @@ export default function App() {
         <span style={{ color:"#FFFFFF", fontWeight:600, fontSize:14, letterSpacing:-0.2 }}>Staffing Analysis</span>
         <span style={{ color:"rgba(255,255,255,0.25)", fontSize:11, fontStyle:"italic", fontWeight:400 }}>For internal purpose only</span>
         <div style={{ flex:1 }} />
+        <button
+          onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+          title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 8,
+            padding: '5px 10px',
+            cursor: 'pointer',
+            color: '#CBD5E1',
+            fontSize: 14,
+            display: 'flex', alignItems: 'center', gap: 5,
+            marginRight: 8,
+          }}
+        >
+          <i className={`ti ${theme === 'dark' ? 'ti-sun' : 'ti-moon'}`} style={{ fontSize: 14 }} />
+        </button>
         {isLive ? (
           <span style={{
             fontSize:11, fontWeight:600, letterSpacing:0.3,

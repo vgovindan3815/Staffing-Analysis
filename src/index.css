@@ -1,21 +1,44 @@
+/* ── Theme-invariant tokens ─────────────────────────── */
 :root {
+  --accent:   #A100FF;
+  --us-col:   #60A5FA;
+  --off-col:  #FB923C;
+  --ar-col:   #C084FC;
+  --success:  #10B981;
+  --warning:  #F59E0B;
+  --danger:   #EF4444;
+}
+
+/* ── Dark theme (default) ───────────────────────────── */
+:root, [data-theme="dark"] {
+  --bg-app:       #0F172A;
+  --bg-card:      #111827;
+  --bg-card2:     #1a2234;
+  --bg-navbar:    #0A0A14;
+  --bg-sidebar:   #080D18;
+  --border:       #1E293B;
+  --border-faint: rgba(255,255,255,0.08);
+  --text-h:       #F8FAFC;
+  --text-b:       #94A3B8;
+  --text-b2:      rgba(255,255,255,0.55);
+  --text-m:       rgba(255,255,255,0.35);
+  --chart-grid:   #1E293B;
+  --chart-tick:   rgba(255,255,255,0.35);
+  --tooltip-bg:   #1a2234;
+  --input-bg:     rgba(255,255,255,0.06);
+  --row-alt:      rgba(255,255,255,0.03);
+  --row-hover:    rgba(255,255,255,0.05);
+  --upload-text:  rgba(255,255,255,0.6);
+  --upload-sub:   rgba(255,255,255,0.3);
+
+  /* legacy aliases */
   --text: #94A3B8;
-  --text-h: #F8FAFC;
   --bg: #0F172A;
-  --border: #1E293B;
   --code-bg: rgba(161,0,255,0.15);
-  --accent: #A100FF;
   --accent-bg: rgba(161, 0, 255, 0.1);
   --accent-border: rgba(161, 0, 255, 0.35);
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-  --font-mono: ui-monospace, Consolas, monospace;
-
-  /* legacy color vars used in some inline styles */
   --color-background-secondary: rgba(255,255,255,0.03);
   --color-text-secondary: #94A3B8;
   --color-text-primary: #F8FAFC;
@@ -26,9 +49,60 @@
   --color-text-danger: #EF4444;
   --color-background-danger: rgba(239,68,68,0.12);
 
+  color-scheme: dark;
+}
+
+/* ── Light theme ────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-app:       #F0F2F5;
+  --bg-card:      #FFFFFF;
+  --bg-card2:     #F8FAFC;
+  --bg-navbar:    #0A0A14;
+  --bg-sidebar:   #F1F5F9;
+  --border:       #E2E8F0;
+  --border-faint: rgba(0,0,0,0.09);
+  --text-h:       #0F172A;
+  --text-b:       #475569;
+  --text-b2:      rgba(0,0,0,0.55);
+  --text-m:       rgba(0,0,0,0.45);
+  --chart-grid:   #E2E8F0;
+  --chart-tick:   rgba(0,0,0,0.45);
+  --tooltip-bg:   #FFFFFF;
+  --input-bg:     rgba(0,0,0,0.04);
+  --row-alt:      rgba(0,0,0,0.03);
+  --row-hover:    rgba(0,0,0,0.04);
+  --upload-text:  rgba(0,0,0,0.6);
+  --upload-sub:   rgba(0,0,0,0.35);
+
+  /* legacy aliases for light */
+  --text: #475569;
+  --bg: #F0F2F5;
+  --code-bg: rgba(161,0,255,0.12);
+  --accent-bg: rgba(161, 0, 255, 0.08);
+  --accent-border: rgba(161, 0, 255, 0.35);
+  --shadow:
+    rgba(0, 0, 0, 0.12) 0 10px 15px -3px, rgba(0, 0, 0, 0.08) 0 4px 6px -2px;
+  --color-background-secondary: rgba(0,0,0,0.03);
+  --color-text-secondary: #475569;
+  --color-text-primary: #0F172A;
+  --color-text-tertiary: rgba(0,0,0,0.35);
+  --color-border-tertiary: #E2E8F0;
+  --color-text-success: #10B981;
+  --color-background-success: rgba(16,185,129,0.12);
+  --color-text-danger: #EF4444;
+  --color-background-danger: rgba(239,68,68,0.12);
+
+  color-scheme: light;
+}
+
+:root {
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+  --font-mono: ui-monospace, Consolas, monospace;
+
   font: 14px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -39,8 +113,8 @@
 
 body {
   margin: 0;
-  background: #0F172A;
-  color: #F8FAFC;
+  background: var(--bg-app);
+  color: var(--text-h);
 }
 
 #root {

@@ -1,16 +1,16 @@
 import { useState, useRef } from "react";
 
-const BG_SIDEBAR  = "#080D18";
-const BORDER      = "rgba(255,255,255,0.08)";
-const ACCENT      = "#A100FF";
-const TEXT_H      = "#F8FAFC";
-const TEXT_B      = "rgba(255,255,255,0.55)";
-const TEXT_M      = "rgba(255,255,255,0.3)";
-const US_COL      = "#60A5FA";
-const OFF_COL     = "#FB923C";
-const AR_COL      = "#C084FC";
-const SUCCESS_COL = "#10B981";
-const WARNING_COL = "#F59E0B";
+const BG_SIDEBAR  = "var(--bg-sidebar)";
+const BORDER      = "var(--border-faint)";
+const ACCENT      = "var(--accent)";
+const TEXT_H      = "var(--text-h)";
+const TEXT_B      = "var(--text-b2)";
+const TEXT_M      = "var(--text-m)";
+const US_COL      = "var(--us-col)";
+const OFF_COL     = "var(--off-col)";
+const AR_COL      = "var(--ar-col)";
+const SUCCESS_COL = "var(--success)";
+const WARNING_COL = "var(--warning)";
 
 function fmtCost(v) {
   if (!v) return "—";
@@ -89,16 +89,16 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
           }}
         >
           <i className="ti ti-file-spreadsheet" style={{ fontSize:30, color:ACCENT }} />
-          <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", textAlign:"center", lineHeight:1.5 }}>
+          <div style={{ fontSize:12, color:"var(--upload-text)", textAlign:"center", lineHeight:1.5 }}>
             Drag and drop<br />or click to upload
           </div>
-          <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)" }}>.xlsx · .xls</div>
+          <div style={{ fontSize:10, color:"var(--upload-sub)" }}>.xlsx · .xls</div>
           <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display:"none" }}
             onChange={e => { const f=e.target.files?.[0]; if(f) onUpload(f); e.target.value=""; }} />
         </div>
       ) : (
         <div style={{ margin:"14px 12px 0", padding:14, background:"rgba(161,0,255,0.1)", border:"1px solid rgba(161,0,255,0.25)", borderRadius:12, flexShrink:0 }}>
-          <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.7, color:"rgba(255,255,255,0.4)", marginBottom:6 }}>Active file</div>
+          <div style={{ fontSize:9, fontWeight:700, textTransform:"uppercase", letterSpacing:.7, color:"var(--text-m)", marginBottom:6 }}>Active file</div>
           <div style={{ fontSize:12, color:TEXT_H, fontWeight:600, wordBreak:"break-all", lineHeight:1.4, marginBottom:storedDate?8:10 }}>{storedName}</div>
           {storedDate && <div style={{ fontSize:10, color:TEXT_M, marginBottom:10 }}>
             {new Date(storedDate).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" })}
@@ -109,7 +109,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
               Replace
             </button>
             <button onClick={onReset}
-              style={{ flex:1, fontSize:11, padding:"6px 0", background:"rgba(255,255,255,0.05)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_B, cursor:"pointer" }}>
+              style={{ flex:1, fontSize:11, padding:"6px 0", background:"var(--input-bg)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_B, cursor:"pointer" }}>
               Clear
             </button>
           </div>
@@ -134,7 +134,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
                   style={{
                     width:14, height:14, borderRadius:3, flexShrink:0,
                     background: active ? color : "transparent",
-                    border: `1.5px solid ${active ? color : "rgba(255,255,255,0.2)"}`,
+                    border: `1.5px solid ${active ? color : "var(--border-faint)"}`,
                     display:"flex", alignItems:"center", justifyContent:"center",
                     cursor:"pointer", transition:"all 0.15s",
                   }}
@@ -176,7 +176,7 @@ export default function HomeSidebar({ staffing, costs, margin, setMargin, isLive
               <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                 <input type="number" min="0" max="99" step="0.5" value={margin}
                   onChange={e => setMargin(parseFloat(e.target.value)||0)}
-                  style={{ width:64, padding:"5px 8px", fontSize:16, fontWeight:700, background:"rgba(255,255,255,0.06)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_H, outline:"none" }} />
+                  style={{ width:64, padding:"5px 8px", fontSize:16, fontWeight:700, background:"var(--input-bg)", border:`1px solid ${BORDER}`, borderRadius:6, color:TEXT_H, outline:"none" }} />
                 <span style={{ fontSize:12, color:TEXT_M }}>%</span>
               </div>
               <div style={{ display:"flex", justifyContent:"space-between" }}>

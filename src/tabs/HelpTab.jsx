@@ -1,9 +1,9 @@
-const ACCENT = "#A100FF";
-const BG_CARD = "#111827";
-const BORDER  = "#1E293B";
-const TEXT_H  = "#F8FAFC";
-const TEXT_B  = "#94A3B8";
-const TEXT_M  = "rgba(255,255,255,0.35)";
+const ACCENT = "var(--accent)";
+const BG_CARD = "var(--bg-card)";
+const BORDER  = "var(--border)";
+const TEXT_H  = "var(--text-h)";
+const TEXT_B  = "var(--text-b)";
+const TEXT_M  = "var(--text-m)";
 
 const COLUMNS = [
   { col:"A / Program",       header:"program",         required:false, description:"Programme name — same value in all rows" },
@@ -50,12 +50,12 @@ export default function HelpTab() {
 
       {/* Column table */}
       <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, overflow:"hidden" }}>
-        <div style={{ padding:"12px 16px", background:"#0F172A", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
+        <div style={{ padding:"12px 16px", background:"var(--bg-app)", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
           Column reference
         </div>
         <table style={{ width:"100%", borderCollapse:"collapse" }}>
           <thead>
-            <tr style={{ background:"#0F172A" }}>
+            <tr style={{ background:"var(--bg-app)" }}>
               {["Template position","Header name","Required","Description"].map((h,i) => (
                 <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:TEXT_M, textTransform:"uppercase", letterSpacing:0.5, borderBottom:`1px solid ${BORDER}` }}>{h}</th>
               ))}
@@ -63,7 +63,7 @@ export default function HelpTab() {
           </thead>
           <tbody>
             {COLUMNS.map((c, i) => (
-              <tr key={i} style={{ background: i%2===1 ? "rgba(255,255,255,0.03)" : "transparent" }}>
+              <tr key={i} style={{ background: i%2===1 ? "var(--row-alt)" : "transparent" }}>
                 <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B, whiteSpace:"nowrap" }}>{c.col}</td>
                 <td style={{ padding:"10px 14px" }}>
                   <code style={{ background:"rgba(161,0,255,0.2)", color:"#C084FC", padding:"2px 7px", borderRadius:4, fontSize:12, fontWeight:600 }}>{c.header}</code>
@@ -82,21 +82,21 @@ export default function HelpTab() {
 
       {/* Location values */}
       <div style={{ background:BG_CARD, border:`1px solid ${BORDER}`, borderRadius:10, overflow:"hidden" }}>
-        <div style={{ padding:"12px 16px", background:"#0F172A", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
+        <div style={{ padding:"12px 16px", background:"var(--bg-app)", borderBottom:`1px solid ${BORDER}`, fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:0.6, color:TEXT_M }}>
           Location values
         </div>
         <table style={{ width:"100%", borderCollapse:"collapse" }}>
           <thead>
             <tr>
               {["Accepted values","Type","Hours/day"].map((h,i) => (
-                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:TEXT_M, textTransform:"uppercase", letterSpacing:0.5, borderBottom:`1px solid ${BORDER}`, background:"#0F172A" }}>{h}</th>
+                <th key={i} style={{ padding:"10px 14px", textAlign:"left", fontSize:11, fontWeight:700, color:TEXT_M, textTransform:"uppercase", letterSpacing:0.5, borderBottom:`1px solid ${BORDER}`, background:"var(--bg-app)" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {LOCATIONS.map((l, i) => (
-              <tr key={i} style={{ background: i%2===1 ? "rgba(255,255,255,0.03)" : "transparent" }}>
-                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B }}><code style={{ fontSize:12, background:"rgba(255,255,255,0.06)", color:TEXT_H }}>{l.value}</code></td>
+              <tr key={i} style={{ background: i%2===1 ? "var(--row-alt)" : "transparent" }}>
+                <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B }}><code style={{ fontSize:12, background:"var(--input-bg)", color:TEXT_H }}>{l.value}</code></td>
                 <td style={{ padding:"10px 14px", fontSize:12, fontWeight:600, color: l.type.startsWith("Offshore") ? "#FB923C" : "#60A5FA" }}>{l.type}</td>
                 <td style={{ padding:"10px 14px", fontSize:12, color:TEXT_B }}>{l.hrs}</td>
               </tr>
@@ -125,13 +125,13 @@ export default function HelpTab() {
           <div>
             <div style={{ fontSize:11, color:TEXT_M, marginBottom:6 }}>Numeric</div>
             <div style={{ display:"flex", gap:6 }}>
-              {["M1","M2","M3","...","M24"].map(m => <code key={m} style={{ background:"rgba(255,255,255,0.06)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
+              {["M1","M2","M3","...","M24"].map(m => <code key={m} style={{ background:"var(--input-bg)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
             </div>
           </div>
           <div>
             <div style={{ fontSize:11, color:TEXT_M, marginBottom:6 }}>Named</div>
             <div style={{ display:"flex", gap:6 }}>
-              {["Jun-24","Jul-24","Aug-24","...","May-26"].map(m => <code key={m} style={{ background:"rgba(255,255,255,0.06)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
+              {["Jun-24","Jul-24","Aug-24","...","May-26"].map(m => <code key={m} style={{ background:"var(--input-bg)", color:TEXT_H, padding:"3px 8px", borderRadius:4, fontSize:12 }}>{m}</code>)}
             </div>
           </div>
         </div>
