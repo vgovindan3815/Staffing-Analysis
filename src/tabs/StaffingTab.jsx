@@ -63,6 +63,98 @@ const REINVENT = {
   },
 };
 
+// ── Mainframe Modernization guidelines ─────────────────────────────────
+const MAINFRAME_MODELS = {
+  "Re-Platform": {
+    HT: {
+      label: "High Touch", onPct: 31, offPct: 69, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 2.7,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.5  },
+        "6-Senior Manager":       { on: 10.1, off: 3.3  },
+        "7-Manager":              { on: 33.6, off: 13.4 },
+        "8-Associate Manager":    { on: 26.8, off: 13.4 },
+        "9-Team Lead/Consultant": { on: 13.4, off: 20.2 },
+        "10-Senior Analyst":      { on: 13.4, off: 26.9 },
+        "11-Analyst":             { on: 0.0,  off: 13.4 },
+        "12-Associate":           { on: 0.0,  off: 6.7  },
+      },
+    },
+    MT: {
+      label: "Mid Touch", onPct: 21, offPct: 79, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 4.0,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.4  },
+        "6-Senior Manager":       { on: 11.9, off: 3.2  },
+        "7-Manager":              { on: 44.6, off: 11.8 },
+        "8-Associate Manager":    { on: 19.8, off: 11.8 },
+        "9-Team Lead/Consultant": { on: 19.8, off: 17.7 },
+        "10-Senior Analyst":      { on: 0.0,  off: 29.5 },
+        "11-Analyst":             { on: 0.0,  off: 17.7 },
+        "12-Associate":           { on: 0.0,  off: 5.9  },
+      },
+    },
+    LT: {
+      label: "Low Touch", onPct: 15, offPct: 85, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 4.2,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.4  },
+        "6-Senior Manager":       { on: 11.3, off: 3.2  },
+        "7-Manager":              { on: 56.3, off: 11.1 },
+        "8-Associate Manager":    { on: 28.2, off: 11.1 },
+        "9-Team Lead/Consultant": { on: 0.0,  off: 16.6 },
+        "10-Senior Analyst":      { on: 0.0,  off: 27.7 },
+        "11-Analyst":             { on: 0.0,  off: 16.6 },
+        "12-Associate":           { on: 0.0,  off: 11.1 },
+      },
+    },
+  },
+  "Re-Factor": {
+    HT: {
+      label: "High Touch", onPct: 30, offPct: 70, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 3.1,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.5  },
+        "6-Senior Manager":       { on: 10.8, off: 3.3  },
+        "7-Manager":              { on: 32.3, off: 10.5 },
+        "8-Associate Manager":    { on: 21.5, off: 20.9 },
+        "9-Team Lead/Consultant": { on: 21.5, off: 20.9 },
+        "10-Senior Analyst":      { on: 10.8, off: 20.9 },
+        "11-Analyst":             { on: 0.0,  off: 15.7 },
+        "12-Associate":           { on: 0.0,  off: 5.2  },
+      },
+    },
+    MT: {
+      label: "Mid Touch", onPct: 23, offPct: 77, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 3.0,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.4  },
+        "6-Senior Manager":       { on: 10.8, off: 3.2  },
+        "7-Manager":              { on: 43.1, off: 9.4  },
+        "8-Associate Manager":    { on: 28.7, off: 14.4 },
+        "9-Team Lead/Consultant": { on: 14.4, off: 23.5 },
+        "10-Senior Analyst":      { on: 0.0,  off: 23.5 },
+        "11-Analyst":             { on: 0.0,  off: 18.8 },
+        "12-Associate":           { on: 0.0,  off: 4.7  },
+      },
+    },
+    LT: {
+      label: "Low Touch", onPct: 17, offPct: 83, blendedLCR: null,
+      levels: {
+        "Leadership":             { on: 2.9,  off: 1.1  },
+        "5-Associate Director":   { on: 0.0,  off: 1.4  },
+        "6-Senior Manager":       { on: 9.7,  off: 3.2  },
+        "7-Manager":              { on: 48.5, off: 8.9  },
+        "8-Associate Manager":    { on: 19.4, off: 13.9 },
+        "9-Team Lead/Consultant": { on: 19.4, off: 22.3 },
+        "10-Senior Analyst":      { on: 0.0,  off: 22.3 },
+        "11-Analyst":             { on: 0.0,  off: 17.9 },
+        "12-Associate":           { on: 0.0,  off: 8.9  },
+      },
+    },
+  },
+};
+
 function gapColor(gap) {
   const abs = Math.abs(gap);
   if (abs <= 3)  return "#10B981";
@@ -130,9 +222,13 @@ function computeCosts(detail) {
 }
 
 function ReinventSection({ staffing }) {
-  const [touch, setTouch] = useState("MT");
+  const [touch, setTouch]       = useState("MT");
+  const [model, setModel]       = useState("migration");   // "migration" | "mainframe"
+  const [dealType, setDealType] = useState("Re-Platform"); // "Re-Platform" | "Re-Factor"
 
-  const guide = REINVENT[touch];
+  const guide = model === "migration"
+    ? REINVENT[touch]
+    : MAINFRAME_MODELS[dealType][touch];
 
   const onCount  = staffing.us ?? 0;
   const offCount = (staffing.india ?? 0) + (staffing.argentina ?? 0);
@@ -212,43 +308,78 @@ function ReinventSection({ staffing }) {
 
   const EconResult = ({ label, actual, target, unit="$" }) => {
     if (actual === null || actual === 0) return null;
-    const gap = actual - target;
-    const gapPct = gap / target * 100;
     return (
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
         padding:"10px 0", borderBottom:"1px solid var(--border)" }}>
         <span style={{ fontSize:13, color:"var(--text-b)" }}>{label}</span>
         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
           <span style={{ fontSize:18, fontWeight:700 }}>{unit}{actual.toFixed(2)}</span>
-          <span style={{ fontSize:12, color:"var(--text-b)" }}>target {unit}{target.toFixed(2)}</span>
-          <span style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"2px 8px",
-            borderRadius:4, background:gapBg(gapPct), color:gapColor(gapPct), fontWeight:500, fontSize:12 }}>
-            <i className={`ti ${gapIcon(gapPct)}`} style={{ fontSize:12 }} />
-            {gap > 0 ? "+" : ""}{unit}{Math.abs(gap).toFixed(2)}
-          </span>
+          {target != null && (() => {
+            const gap = actual - target;
+            const gapPct = gap / target * 100;
+            return <>
+              <span style={{ fontSize:12, color:"var(--text-b)" }}>target {unit}{target.toFixed(2)}</span>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"2px 8px",
+                borderRadius:4, background:gapBg(gapPct), color:gapColor(gapPct), fontWeight:500, fontSize:12 }}>
+                <i className={`ti ${gapIcon(gapPct)}`} style={{ fontSize:12 }} />
+                {gap > 0 ? "+" : ""}{unit}{Math.abs(gap).toFixed(2)}
+              </span>
+            </>;
+          })()}
         </div>
       </div>
     );
   };
 
+  const btnStyle = (active) => ({
+    padding:"5px 14px", fontSize:12, borderRadius:6, cursor:"pointer", fontWeight:active?600:400,
+    background: active ? TEAL : "var(--bg-card2)",
+    color: active ? "#FFFFFF" : "var(--text-b)",
+    border: active ? "none" : "1px solid var(--border)",
+  });
+
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-        <span style={{ fontSize:13, color:"var(--text-b)" }}>Reinvent model:</span>
-        <div style={{ display:"flex", gap:4 }}>
-          {Object.entries(REINVENT).map(([key, g]) => (
-            <button key={key} onClick={() => setTouch(key)}
-              style={{ padding:"6px 14px", fontSize:13, borderRadius:6, cursor:"pointer", fontWeight:touch===key?600:400,
-                background: touch===key ? TEAL : "var(--bg-card2)",
-                color: touch===key ? "#FFFFFF" : "var(--text-b)",
-                border: touch===key ? "none" : "1px solid var(--border)" }}>
-              {g.label}
-            </button>
-          ))}
+
+      {/* ── Selector header ─── */}
+      <div style={{ ...s.card, padding:"12px 16px", display:"flex", flexDirection:"column", gap:10 }}>
+
+        {/* Row 1: Model type */}
+        <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+          <span style={{ fontSize:12, color:"var(--text-b)", minWidth:80 }}>Model type:</span>
+          <div style={{ display:"flex", gap:4 }}>
+            <button onClick={() => setModel("migration")}  style={btnStyle(model==="migration")}>Migration</button>
+            <button onClick={() => setModel("mainframe")}  style={btnStyle(model==="mainframe")}>Mainframe Replatform</button>
+          </div>
         </div>
-        <span style={{ fontSize:12, color:"var(--text-b)", marginLeft:4 }}>
-          Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:12 }} /> · 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:12 }} /> · &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:12 }} />
-        </span>
+
+        {/* Row 2: Deal type — only for Mainframe */}
+        {model === "mainframe" && (
+          <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+            <span style={{ fontSize:12, color:"var(--text-b)", minWidth:80 }}>Deal type:</span>
+            <div style={{ display:"flex", gap:4 }}>
+              {Object.keys(MAINFRAME_MODELS).map(dt => (
+                <button key={dt} onClick={() => setDealType(dt)} style={btnStyle(dealType===dt)}>{dt}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Row 3: Touch model */}
+        <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+          <span style={{ fontSize:12, color:"var(--text-b)", minWidth:80 }}>Touch model:</span>
+          <div style={{ display:"flex", gap:4 }}>
+            {Object.entries(REINVENT).map(([key, g]) => (
+              <button key={key} onClick={() => setTouch(key)} style={btnStyle(touch===key)}>{g.label}</button>
+            ))}
+          </div>
+          <span style={{ fontSize:11, color:"var(--text-m)", marginLeft:4 }}>
+            Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:11 }} />
+            {" "}· 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:11 }} />
+            {" "}· &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:11 }} />
+          </span>
+        </div>
+
       </div>
 
       <div style={{ ...s.card, padding:"12px 16px" }}>
