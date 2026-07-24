@@ -835,6 +835,117 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
           <div style={{ fontSize:11, color:"var(--text-m)" }}>{groupPeople > 0 ? Math.round(groupTotalDays/groupPeople) : 0}d per person avg</div>
         </div>
       </div>
+      {/* ── Combined graphical view ── */}
+      {(() => {
+        const allBands = Array.from(new Set([
+          ...onshoreLevels.map(l => l.band),
+          ...offshoreLevels.map(l => l.band),
+        ]));
+        const chartData = allBands.map(band => {
+          const on  = levels.find(l => l.band === band);
+          const us  = on ? Math.round(on.us ?? 0) : 0;
+          const off = on ? Math.round((on.india ?? 0) + (on.ar ?? 0)) : 0;
+          return { band: band.replace(/^\d+-/, ""), us, offshore: off, total: us + off };
+        }).filter(d => d.total > 0);
+
+        const maxTotal = Math.max(...chartData.map(d => d.total), 1);
+        const indiaTotal = levels.reduce((a, l) => a + (l.india ?? 0), 0);
+        const arTotal    = levels.reduce((a, l) => a + (l.ar ?? 0), 0);
+        const onPct  = groupPeople > 0 ? Math.round(onshoreTotal / groupPeople * 100) : 0;
+        const offPct = 100 - onPct;
+
+        return (
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:12 }}>
+            {/* Stacked horizontal bar chart */}
+            <div style={s.card}>
+              <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:10 }}>
+                Headcount by level — onshore vs offshore
+              </div>
+              <div style={{ display:"flex", gap:14, marginBottom:12 }}>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                  <span style={{ width:10, height:10, borderRadius:2, background:US_COL, display:"inline-block" }} />Onshore (US)
+                </span>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                  <span style={{ width:10, height:10, borderRadius:2, background:OFF_COL, display:"inline-block" }} />Offshore (India + AR)
+                </span>
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {chartData.map(d => (
+                  <div key={d.band} style={{ display:"flex", alignItems:"center", gap:8 }}>
+                    <div style={{ width:160, fontSize:11, color:"var(--text-b)", flexShrink:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.band}</div>
+                    <div style={{ flex:1, height:20, borderRadius:4, background:"var(--row-alt)", overflow:"hidden", display:"flex" }}>
+                      {d.us > 0 && (
+                        <div style={{ width:`${d.us / maxTotal * 100}%`, background:US_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth: d.us > 0 ? 18 : 0 }}>
+                          {d.us}
+                        </div>
+                      )}
+                      {d.offshore > 0 && (
+                        <div style={{ width:`${d.offshore / maxTotal * 100}%`, background:OFF_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth: d.offshore > 0 ? 18 : 0 }}>
+                          {d.offshore}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ width:24, fontSize:10, color:"var(--text-m)", textAlign:"right", flexShrink:0 }}>{d.total}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Overall mix panel */}
+            <div style={{ ...s.card, display:"flex", flexDirection:"column", gap:12 }}>
+              <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)" }}>Overall mix</div>
+
+              {/* Split bar */}
+              <div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                  <span style={{ fontSize:10, color:US_COL, fontWeight:600 }}>{onPct}% US</span>
+                  <span style={{ fontSize:10, color:OFF_COL, fontWeight:600 }}>{offPct}% Offshore</span>
+                </div>
+                <div style={{ height:20, borderRadius:6, overflow:"hidden", display:"flex" }}>
+                  <div style={{ width:`${onPct}%`, background:US_COL }} />
+                  <div style={{ width:`${offPct}%`, background:OFF_COL }} />
+                </div>
+              </div>
+
+              {/* Headcounts */}
+              <div style={{ display:"flex", justifyContent:"space-between", paddingTop:4, borderTop:"1px solid var(--border)" }}>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:700, color:US_COL }}>{onshoreTotal}</div>
+                  <div style={{ fontSize:10, color:"var(--text-m)" }}>Onshore</div>
+                </div>
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:16, fontWeight:700, color:OFF_COL }}>{offshoreTotal}</div>
+                  <div style={{ fontSize:10, color:"var(--text-m)" }}>Offshore</div>
+                </div>
+              </div>
+
+              {/* Offshore breakdown */}
+              {(indiaTotal > 0 || arTotal > 0) && (
+                <div style={{ paddingTop:8, borderTop:"1px solid var(--border)" }}>
+                  <div style={{ fontSize:10, color:"var(--text-m)", textTransform:"uppercase", letterSpacing:0.4, marginBottom:6 }}>Offshore breakdown</div>
+                  {indiaTotal > 0 && (
+                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+                      <span style={{ fontSize:11, color:"var(--text-b)" }}>India</span>
+                      <span style={{ fontSize:11, fontWeight:600 }}>{Math.round(indiaTotal)}</span>
+                    </div>
+                  )}
+                  {arTotal > 0 && (
+                    <div style={{ display:"flex", justifyContent:"space-between" }}>
+                      <span style={{ fontSize:11, color:"var(--text-b)" }}>Argentina</span>
+                      <span style={{ fontSize:11, fontWeight:600 }}>{Math.round(arTotal)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Detailed tables (numbers view) ── */}
+      <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginTop:4, marginBottom:2, paddingLeft:2 }}>
+        Detailed breakdown
+      </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
         {onshoreLevels.length > 0 && (
           <LevelSection
