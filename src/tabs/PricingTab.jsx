@@ -364,6 +364,124 @@ function GroupLevelView({ groupName, groupLevels, billByBand, margin, DAYS, live
         ))}
       </div>
 
+      {/* ── Cost by level — graphical view ── */}
+      {(() => {
+        const allBands = Array.from(new Set([
+          ...onLevels.map(l => l.band),
+          ...offLevels.map(l => l.band),
+        ]));
+        const chartData = allBands.map(band => {
+          const l = groupLevels.find(x => x.band === band);
+          if (!l) return null;
+          const { usDays, offDays: offD } = locSplit(l, DAYS);
+          const { onBill, offBill } = billRates(l, billByBand);
+          const onCostL  = usDays * onBill  * ON_HRS;
+          const offCostL = offD   * offBill * OFF_HRS;
+          return { band: band.replace(/^\d+-/, ""), onCost: onCostL, offCost: offCostL, total: onCostL + offCostL };
+        }).filter(d => d && d.total > 0);
+
+        const maxCost = Math.max(...chartData.map(d => d.total), 1);
+        const onPct  = totalCost > 0 ? Math.round(onCost  / totalCost * 100) : 0;
+        const offPct = 100 - onPct;
+        const blendedOn  = onDays  > 0 ? onCost  / onDays  / ON_HRS  : 0;
+        const blendedOff = offDays > 0 ? offCost / offDays / OFF_HRS : 0;
+        const blendedAll = (onDays + offDays) > 0 ? totalCost / (onDays + offDays) / ((onDays * ON_HRS + offDays * OFF_HRS) / Math.max(1, onDays + offDays)) : 0;
+
+        return (
+          <div style={{ display:"grid", gridTemplateColumns:"3fr 2fr", gap:12 }}>
+            {/* Stacked cost bars by level */}
+            <div style={s.card}>
+              <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:10 }}>
+                Cost by level — onshore vs offshore
+              </div>
+              <div style={{ display:"flex", gap:14, marginBottom:10 }}>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                  <span style={{ width:10, height:10, borderRadius:2, background:US_COL, display:"inline-block" }} />Onshore cost
+                </span>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                  <span style={{ width:10, height:10, borderRadius:2, background:OFF_COL, display:"inline-block" }} />Offshore cost
+                </span>
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {chartData.map(d => {
+                  const onW  = d.onCost  / maxCost * 100;
+                  const offW = d.offCost / maxCost * 100;
+                  return (
+                    <div key={d.band} style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <div style={{ width:130, fontSize:11, color:"var(--text-b)", flexShrink:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.band}</div>
+                      <div style={{ flex:1, height:20, borderRadius:4, background:"var(--row-alt)", overflow:"hidden", display:"flex" }}>
+                        {onW > 0 && (
+                          <div style={{ width:`${onW}%`, background:US_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth:4 }}>
+                            {onW > 14 ? fmtM(d.onCost) : ""}
+                          </div>
+                        )}
+                        {offW > 0 && (
+                          <div style={{ width:`${offW}%`, background:OFF_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth:4 }}>
+                            {offW > 14 ? fmtM(d.offCost) : ""}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ width:52, fontSize:10, color:"var(--text-h)", fontWeight:600, textAlign:"right", flexShrink:0 }}>{fmtM(d.total)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Cost split panel */}
+            <div style={{ ...s.card, display:"flex", flexDirection:"column", gap:10 }}>
+              <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)" }}>Cost split</div>
+
+              <div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                  <span style={{ fontSize:10, color:US_COL, fontWeight:600 }}>{onPct}% On</span>
+                  <span style={{ fontSize:10, color:OFF_COL, fontWeight:600 }}>{offPct}% Off</span>
+                </div>
+                <div style={{ height:20, borderRadius:6, overflow:"hidden", display:"flex" }}>
+                  <div style={{ width:`${onPct}%`, background:US_COL }} />
+                  <div style={{ width:`${offPct}%`, background:OFF_COL }} />
+                </div>
+              </div>
+
+              <div style={{ paddingTop:8, borderTop:"1px solid var(--border)", display:"flex", flexDirection:"column", gap:5 }}>
+                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:11, color:"var(--text-b)" }}>Onshore cost</span>
+                  <span style={{ fontSize:13, fontWeight:700, color:US_COL }}>{fmtM(onCost)}</span>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:11, color:"var(--text-b)" }}>Offshore cost</span>
+                  <span style={{ fontSize:13, fontWeight:700, color:OFF_COL }}>{fmtM(offCost)}</span>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", paddingTop:6, borderTop:"1px solid var(--border)" }}>
+                  <span style={{ fontSize:11, color:"var(--text-b)" }}>Total cost</span>
+                  <span style={{ fontSize:13, fontWeight:700 }}>{fmtM(totalCost)}</span>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:11, color:"#A100FF" }}>Price ({margin.toFixed(1)}%)</span>
+                  <span style={{ fontSize:13, fontWeight:700, color:"#A100FF" }}>{fmtM(totalCost * price)}</span>
+                </div>
+              </div>
+
+              <div style={{ paddingTop:8, borderTop:"1px solid var(--border)" }}>
+                <div style={{ fontSize:10, color:"var(--text-m)", textTransform:"uppercase", letterSpacing:0.4, marginBottom:4 }}>Blended LCR</div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:2 }}>
+                  <span style={{ fontSize:10, color:"var(--text-b)" }}>Onshore</span>
+                  <span style={{ fontSize:11, fontWeight:600 }}>{fmtHr(blendedOn)}</span>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:10, color:"var(--text-b)" }}>Offshore</span>
+                  <span style={{ fontSize:11, fontWeight:600 }}>{fmtHr(blendedOff)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Detailed level tables (numbers view) ── */}
+      <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginTop:4, marginBottom:2, paddingLeft:2 }}>
+        Detailed breakdown
+      </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
         {onLevels.length > 0  && <LevelSection title="Onshore (US)"          color={US_COL}  rows={onLevels}  locationKey="us"  />}
         {offLevels.length > 0 && <LevelSection title="Offshore (India + AR)" color={OFF_COL} rows={offLevels} locationKey="off" />}
@@ -598,6 +716,65 @@ export default function PricingTab({ staffing, liveDetail, margin, setMargin }) 
           <div style={s.kpiSub}>at {margin.toFixed(1)}% margin</div>
         </div>
       </div>
+
+      {/* ── Cost by role group — stacked bar chart ── */}
+      {groupRows.length > 0 && (() => {
+        const maxCost = Math.max(...groupRows.map(g => g.totalCost), 1);
+        return (
+          <div style={s.card}>
+            <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:10 }}>
+              Program cost by role group
+            </div>
+            <div style={{ display:"flex", gap:14, marginBottom:10 }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                <span style={{ width:10, height:10, borderRadius:2, background:US_COL, display:"inline-block" }} />Onshore cost
+              </span>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:10, color:"var(--text-b)" }}>
+                <span style={{ width:10, height:10, borderRadius:2, background:OFF_COL, display:"inline-block" }} />Offshore cost
+              </span>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
+              {groupRows.map(g => {
+                const onW  = g.totalCost > 0 ? g.onCost  / maxCost * 100 : 0;
+                const offW = g.totalCost > 0 ? g.offCost / maxCost * 100 : 0;
+                const showOnLabel  = onW  > 12;
+                const showOffLabel = offW > 12;
+                return (
+                  <div key={g.name} style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }}
+                    onClick={() => setDrill({ type:"group", name:g.name, levels:g.levels })}>
+                    <div style={{ width:130, fontSize:11, color:"var(--text-b)", flexShrink:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                      <span style={{ display:"inline-block", width:7, height:7, borderRadius:"50%", background:GROUP_COL[g.name]||TEAL, marginRight:5, verticalAlign:1 }} />
+                      {g.name}
+                    </div>
+                    <div style={{ flex:1, height:20, borderRadius:4, background:"var(--row-alt)", overflow:"hidden", display:"flex" }}>
+                      {onW > 0 && (
+                        <div style={{ width:`${onW}%`, background:US_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth: onW > 0 ? 4 : 0 }}>
+                          {showOnLabel ? fmtM(g.onCost) : ""}
+                        </div>
+                      )}
+                      {offW > 0 && (
+                        <div style={{ width:`${offW}%`, background:OFF_COL, height:"100%", display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:4, fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:600, minWidth: offW > 0 ? 4 : 0 }}>
+                          {showOffLabel ? fmtM(g.offCost) : ""}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ width:52, fontSize:10, color:"var(--text-h)", fontWeight:600, textAlign:"right", flexShrink:0 }}>{fmtM(g.totalCost)}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ marginTop:10, paddingTop:8, borderTop:"1px solid var(--border)", display:"flex", justifyContent:"space-between", fontSize:11, color:"var(--text-b)" }}>
+              <span>Total program cost</span>
+              <span>
+                <strong style={{ color:"var(--text-h)" }}>{fmtM(totalCostAll)}</strong>
+                <span style={{ margin:"0 6px", color:"var(--text-m)" }}>→</span>
+                <strong style={{ color:"#A100FF" }}>{fmtM(totalCostAll * priceMultiplier)}</strong>
+                <span style={{ color:"var(--text-m)", marginLeft:4 }}>at {margin.toFixed(1)}% margin</span>
+              </span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Project (group) level table ── */}
       <div>
