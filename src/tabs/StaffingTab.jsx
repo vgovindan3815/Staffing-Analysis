@@ -855,7 +855,7 @@ function DetailLevelView({ detail, totalDays, total, onBack, DAYS, offshore, liv
         const offPct = 100 - onPct;
 
         return (
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:12 }}>
+          <div style={{ display:"grid", gridTemplateColumns:"3fr 2fr", gap:12 }}>
             {/* Stacked horizontal bar chart */}
             <div style={s.card}>
               <div style={{ fontSize:11, fontWeight:600, letterSpacing:0.5, textTransform:"uppercase", color:"var(--text-b)", marginBottom:10 }}>
