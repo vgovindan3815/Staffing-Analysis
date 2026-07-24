@@ -155,8 +155,31 @@ const MAINFRAME_MODELS = {
   },
 };
 
-function InfoTip({ children }) {
+function InfoTip({ children, placement = "center", direction = "up" }) {
   const [show, setShow] = useState(false);
+
+  const popupPos = placement === "right"
+    ? { right: 0 }
+    : placement === "left"
+      ? { left: 0 }
+      : { left: "50%", transform: "translateX(-50%)" };
+
+  const isDown = direction === "down";
+
+  const bubbleEdge = isDown
+    ? { top: "calc(100% + 8px)", bottom: "auto" }
+    : { bottom: "calc(100% + 8px)" };
+
+  const arrowBase = placement === "right"
+    ? { right: 10, left: "auto", transform: "none" }
+    : placement === "left"
+      ? { left: 10, transform: "none" }
+      : { left: "50%", transform: "translateX(-50%)" };
+
+  const arrowEdge = isDown
+    ? { top: -6, bottom: "auto", rotate: "225deg", borderTop: "1px solid var(--border)", borderLeft: "1px solid var(--border)", borderBottom: "none", borderRight: "none" }
+    : { bottom: -6, rotate: "45deg", borderTop: "none", borderLeft: "none", border: "1px solid var(--border)" };
+
   return (
     <span style={{ position:"relative", display:"inline-flex", alignItems:"center" }}>
       <span
@@ -172,8 +195,7 @@ function InfoTip({ children }) {
       >i</span>
       {show && (
         <div style={{
-          position:"absolute", bottom:"calc(100% + 8px)", left:"50%",
-          transform:"translateX(-50%)",
+          position:"absolute", ...bubbleEdge, ...popupPos,
           background:"var(--bg-card)", border:"1px solid var(--border)",
           borderRadius:10, padding:"12px 14px", zIndex:999,
           width:300, boxShadow:"0 6px 24px rgba(0,0,0,0.25)",
@@ -181,12 +203,9 @@ function InfoTip({ children }) {
           pointerEvents:"none",
         }}>
           {children}
-          {/* Arrow */}
           <div style={{
-            position:"absolute", bottom:-6, left:"50%", transform:"translateX(-50%)",
+            position:"absolute", ...arrowBase, ...arrowEdge,
             width:10, height:10, background:"var(--bg-card)",
-            border:"1px solid var(--border)", borderTop:"none", borderLeft:"none",
-            rotate:"45deg",
           }} />
         </div>
       )}
@@ -438,7 +457,7 @@ function ReinventSection({ staffing }) {
             Gap ≤ 3pp <i className="ti ti-circle-check" style={{ color:"#10B981", fontSize:11, marginLeft:2 }} />
             {" "}· 3–8pp <i className="ti ti-alert-triangle" style={{ color:"#B45309", fontSize:11, marginLeft:2 }} />
             {" "}· &gt;8pp <i className="ti ti-circle-x" style={{ color:"#EF4444", fontSize:11, marginLeft:2 }} />
-            <InfoTip>
+            <InfoTip placement="right" direction="down">
               <div style={{ fontWeight:700, color:"var(--text-h)", marginBottom:6, fontSize:12 }}>Understanding gap badges</div>
               <div style={{ marginBottom:6 }}>
                 <strong style={{ color:"var(--text-h)" }}>pp = percentage points</strong> — direct difference between two percentages (e.g. 28% − 25% = +3pp).
