@@ -982,6 +982,9 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
     ? staffing.groups
     : staffing.groups.filter(g => groupFilter.has(g.name));
 
+  const filteredGroupDays  = visibleGroups.reduce((a, g) => a + (g.totalDays ?? g.people * (staffing.daysPerPerson ?? 320)), 0);
+  const filteredGroupPeople = visibleGroups.reduce((a, g) => a + g.people, 0);
+
   const visiblePods = podFilter.size === 0
     ? staffing.pods
     : staffing.pods.filter(p => podFilter.has(p.name));
@@ -1052,7 +1055,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                         <td style={{ ...s.td, ...s.tdR }}>{g.us}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{g.india}</td>
                         <td style={{ ...s.td, ...s.tdR }}>{fmtN(Math.round(gDays))}</td>
-                        <td style={{ ...s.td, ...s.tdR, color:"var(--text-b)" }}>{pct(gDays, totalDays)}</td>
+                        <td style={{ ...s.td, ...s.tdR, color:"var(--text-b)" }}>{pct(gDays, filteredGroupDays)}</td>
                         <td style={{ ...s.td, ...s.tdR, color: g.us/g.people>0.5?"#10B981":"var(--text-b)" }}>
                           {Math.round(g.us/g.people*100)}%
                         </td>
@@ -1065,7 +1068,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+g.us,0)}</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{visibleGroups.reduce((a,g)=>a+(g.india??0),0)}</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{fmtN(Math.round(visibleGroups.reduce((a,g)=>a+(g.totalDays??g.people*DAYS),0)))}</td>
-                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{groupFilter.size === 0 ? "100%" : pct(visibleGroups.reduce((a,g)=>a+(g.totalDays??g.people*DAYS),0), totalDays)}</td>
+                    <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>100%</td>
                     <td style={{ ...s.td, ...s.tdR, fontWeight:500 }}>{Math.round(visibleGroups.reduce((a,g)=>a+g.us,0)/Math.max(1,visibleGroups.reduce((a,g)=>a+g.people,0))*100)}%</td>
                   </tr>
                 </tbody>
@@ -1074,7 +1077,7 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
             <div style={{ ...s.card, padding:14 }}>
               <div style={s.sectionHdr}>Group size ranking</div>
               {visibleGroups.map(g => (
-                <BarRow key={g.name} label={g.name.slice(0,22)} value={g.people} max={visibleGroups[0]?.people ?? 1} color={GROUP_COL[g.name]||TEAL} right={`${g.people}p`} sub={pct(g.people,total)} />
+                <BarRow key={g.name} label={g.name.slice(0,22)} value={g.people} max={visibleGroups[0]?.people ?? 1} color={GROUP_COL[g.name]||TEAL} right={`${g.people}p`} sub={pct(g.people, filteredGroupPeople)} />
               ))}
             </div>
           </div>
