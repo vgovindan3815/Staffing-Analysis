@@ -1010,19 +1010,22 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
     <>
       {view === "groups" && (
         <>
-          {/* Filter toolbar */}
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+          {/* Filter bar */}
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14, padding:"10px 14px", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:8 }}>
+            <span style={{ fontSize:11, fontWeight:600, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.5, flexShrink:0 }}>Filter by program</span>
             <MultiSelect
               options={staffing.groups.map(g => g.name)}
               selected={groupFilter}
               onChange={setGroupFilter}
-              placeholder="All projects"
-              label="project"
+              placeholder="All programs"
+              label="program"
             />
-            {groupFilter.size > 0 && (
+            {groupFilter.size > 0 ? (
               <span style={{ fontSize:12, color:"var(--text-b)" }}>
-                Showing {visibleGroups.length} of {staffing.groups.length} projects
+                Showing <strong style={{ color:"var(--text-h)" }}>{visibleGroups.length}</strong> of {staffing.groups.length} programs · % of total reflects selection
               </span>
+            ) : (
+              <span style={{ fontSize:12, color:"var(--text-m)" }}>Showing all {staffing.groups.length} programs</span>
             )}
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>

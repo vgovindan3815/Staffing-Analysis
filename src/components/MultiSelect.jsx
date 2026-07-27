@@ -38,10 +38,10 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
         onClick={() => setOpen(o => !o)}
         style={{
           display: "flex", alignItems: "center", gap: 6,
-          padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12,
-          background: hasSelection ? "#F2E6FF" : "#F5F5F5",
-          border: `1px solid ${hasSelection ? "#D9B3FF" : "#E0E0E0"}`,
-          color: hasSelection ? ACCENT : "#555",
+          padding: "7px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12,
+          background: hasSelection ? "rgba(161,0,255,0.12)" : "var(--bg-card)",
+          border: `1px solid ${hasSelection ? "#A100FF" : "var(--border)"}`,
+          color: hasSelection ? "#A100FF" : "var(--text-b)",
           fontWeight: hasSelection ? 600 : 400,
           whiteSpace: "nowrap",
         }}
@@ -51,22 +51,22 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
         {hasSelection && (
           <span
             onClick={(e) => { e.stopPropagation(); clearAll(); }}
-            style={{ marginLeft: 2, color: ACCENT, fontWeight: 700, lineHeight: 1, padding: "0 2px", cursor: "pointer" }}
+            style={{ marginLeft: 2, color: "#A100FF", fontWeight: 700, lineHeight: 1, padding: "0 2px", cursor: "pointer" }}
           >×</span>
         )}
-        <i className={`ti ti-chevron-${open ? "up" : "down"}`} style={{ fontSize: 11, marginLeft: 2, color: "#AAA" }} />
+        <i className={`ti ti-chevron-${open ? "up" : "down"}`} style={{ fontSize: 11, marginLeft: 2, color: "var(--text-m)" }} />
       </button>
 
       {/* Dropdown */}
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 999,
-          background: "#FFF", border: "1px solid #E0E0E0", borderRadius: 10,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.10)", width: 280,
+          background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10,
+          boxShadow: "0 6px 24px rgba(0,0,0,0.35)", width: 280,
           display: "flex", flexDirection: "column", overflow: "hidden",
         }}>
           {/* Search */}
-          <div style={{ padding: "10px 12px 6px", borderBottom: "1px solid #F0F0F0" }}>
+          <div style={{ padding: "10px 12px 6px", borderBottom: "1px solid var(--border)" }}>
             <input
               autoFocus
               value={search}
@@ -74,21 +74,22 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
               placeholder="Search…"
               style={{
                 width: "100%", padding: "6px 10px", borderRadius: 6, fontSize: 12,
-                border: "1px solid #E0E0E0", outline: "none", boxSizing: "border-box",
+                border: "1px solid var(--border)", outline: "none", boxSizing: "border-box",
+                background: "var(--bg-app)", color: "var(--text-h)",
               }}
             />
           </div>
 
           {/* Select all / Clear */}
-          <div style={{ display: "flex", gap: 8, padding: "6px 12px", borderBottom: "1px solid #F0F0F0" }}>
+          <div style={{ display: "flex", gap: 8, padding: "6px 12px", borderBottom: "1px solid var(--border)" }}>
             <button onClick={selectAll} style={{ fontSize: 11, color: ACCENT, background: "none", border: "none", cursor: "pointer", padding: 0, fontWeight: 600 }}>
               Select all
             </button>
-            <span style={{ color: "#DDD" }}>|</span>
-            <button onClick={clearAll} style={{ fontSize: 11, color: "#888", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+            <span style={{ color: "var(--text-m)" }}>|</span>
+            <button onClick={clearAll} style={{ fontSize: 11, color: "var(--text-b)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
               Clear
             </button>
-            <span style={{ marginLeft: "auto", fontSize: 11, color: "#AAA" }}>
+            <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-m)" }}>
               {selected.size}/{options.length}
             </span>
           </div>
@@ -96,12 +97,12 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
           {/* Options list */}
           <div style={{ maxHeight: 240, overflowY: "auto" }}>
             {filtered.length === 0 ? (
-              <div style={{ padding: "12px", fontSize: 12, color: "#AAA", textAlign: "center" }}>No matches</div>
+              <div style={{ padding: "12px", fontSize: 12, color: "var(--text-m)", textAlign: "center" }}>No matches</div>
             ) : filtered.map(opt => (
               <label key={opt} style={{
                 display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer",
-                background: selected.has(opt) ? "#F9F0FF" : "transparent",
-                borderBottom: "0.5px solid #F5F5F5",
+                background: selected.has(opt) ? "rgba(161,0,255,0.08)" : "transparent",
+                borderBottom: "0.5px solid var(--border)",
               }}>
                 <input
                   type="checkbox"
@@ -109,7 +110,7 @@ export default function MultiSelect({ options, selected, onChange, placeholder, 
                   onChange={() => toggle(opt)}
                   style={{ accentColor: ACCENT, width: 14, height: 14, flexShrink: 0 }}
                 />
-                <span style={{ fontSize: 12, color: "#333", flex: 1, lineHeight: 1.4 }}>{opt}</span>
+                <span style={{ fontSize: 12, color: "var(--text-h)", flex: 1, lineHeight: 1.4 }}>{opt}</span>
               </label>
             ))}
           </div>
