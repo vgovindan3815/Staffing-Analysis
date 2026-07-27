@@ -970,35 +970,17 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
   const [detail, setDetail]             = useState(null);
   const [groupFilter, setGroupFilter]   = useState(new Set());
   const [podFilter,   setPodFilter]     = useState(new Set());
-  const [programFilter, setProgramFilter] = useState(new Set());
 
   // Reset drill-down and filters when the user switches top-level tabs
   useEffect(() => {
     setDetail(null);
     setGroupFilter(new Set());
     setPodFilter(new Set());
-    setProgramFilter(new Set());
   }, [view]);
 
-  // Unique program names from live detail (column A of the Excel)
-  const allPrograms = useMemo(() => {
-    if (!liveDetail?.length) return [];
-    return Array.from(new Set(liveDetail.map(r => r.program).filter(Boolean))).sort();
-  }, [liveDetail]);
-
-  // Which role groups belong to the selected programs
-  const groupsInProgram = useMemo(() => {
-    if (!liveDetail?.length || programFilter.size === 0) return null;
-    const set = new Set();
-    for (const r of liveDetail) {
-      if (r.program && programFilter.has(r.program)) set.add(r.group);
-    }
-    return set;
-  }, [liveDetail, programFilter]);
-
-  const visibleGroups = staffing.groups
-    .filter(g => groupsInProgram ? groupsInProgram.has(g.name) : true)
-    .filter(g => groupFilter.size === 0 || groupFilter.has(g.name));
+  const visibleGroups = groupFilter.size === 0
+    ? staffing.groups
+    : staffing.groups.filter(g => groupFilter.has(g.name));
 
   const filteredGroupDays   = visibleGroups.reduce((a, g) => a + (g.totalDays ?? g.people * (staffing.daysPerPerson ?? 320)), 0);
   const filteredGroupPeople = visibleGroups.reduce((a, g) => a + g.people, 0);
@@ -1029,36 +1011,20 @@ export default function StaffingTab({ view, setView, staffing, isLive, loading, 
       {view === "groups" && (
         <>
           {/* Filter bar */}
-          <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:14, padding:"10px 14px", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:8 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-              {allPrograms.length > 0 ? (
-                <>
-                  <span style={{ fontSize:11, fontWeight:600, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.5, flexShrink:0 }}>Program</span>
-                  <MultiSelect
-                    options={allPrograms}
-                    selected={programFilter}
-                    onChange={next => { setProgramFilter(next); setGroupFilter(new Set()); }}
-                    placeholder="All programs"
-                    label="program"
-                  />
-                </>
-              ) : (
-                <span style={{ fontSize:11, color:"var(--text-m)" }}>Upload a file to filter by program</span>
-              )}
-              <span style={{ fontSize:11, fontWeight:600, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.5, flexShrink:0, marginLeft: allPrograms.length > 0 ? 8 : 0 }}>Role group</span>
-              <MultiSelect
-                options={visibleGroups.map(g => g.name)}
-                selected={groupFilter}
-                onChange={setGroupFilter}
-                placeholder="All role groups"
-                label="role group"
-              />
-              {(programFilter.size > 0 || groupFilter.size > 0) && (
-                <span style={{ fontSize:12, color:"var(--text-b)" }}>
-                  Showing <strong style={{ color:"var(--text-h)" }}>{visibleGroups.length}</strong> of {staffing.groups.length} groups · % of total reflects selection
-                </span>
-              )}
-            </div>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14, padding:"10px 14px", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:8 }}>
+            <span style={{ fontSize:11, fontWeight:600, color:"var(--text-b)", textTransform:"uppercase", letterSpacing:0.5, flexShrink:0 }}>Role group</span>
+            <MultiSelect
+              options={staffing.groups.map(g => g.name)}
+              selected={groupFilter}
+              onChange={setGroupFilter}
+              placeholder="All role groups"
+              label="role group"
+            />
+            {groupFilter.size > 0 && (
+              <span style={{ fontSize:12, color:"var(--text-b)" }}>
+                Showing <strong style={{ color:"var(--text-h)" }}>{visibleGroups.length}</strong> of {staffing.groups.length} groups · % of total reflects selection
+              </span>
+            )}
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 220px", gap:14, alignItems:"start" }}>
             <div style={s.card}>

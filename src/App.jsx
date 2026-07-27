@@ -7,6 +7,8 @@ import { saveFile, loadFile, deleteFile, storedToFile } from "./storage/fileStor
 import StaffingTab from "./tabs/StaffingTab.jsx";
 import HomeSidebar from "./components/HomeSidebar.jsx";
 import Chatbot from "./components/Chatbot.jsx";
+import MultiSelect from "./components/MultiSelect.jsx";
+import { reaggregateStaffing } from "./compute/reaggregate.js";
 
 const STORAGE_KEY = "staffing-v1";
 
@@ -45,6 +47,7 @@ export default function App() {
   const [margin, setMargin]           = useState(23);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [locFilter, setLocFilter]     = useState(new Set());
+  const [programFilter, setProgramFilter] = useState(new Set());
   const [theme, setTheme]             = useState(() => localStorage.getItem('sa-theme') || 'dark');
   const resizing = useRef(false);
   const startX   = useRef(0);
@@ -132,6 +135,23 @@ export default function App() {
       return false;
     });
   }, [liveDetail, locFilter]);
+
+  const allPrograms = useMemo(() => {
+    if (!liveDetail?.length) return [];
+    return Array.from(new Set(liveDetail.map(r => r.program).filter(Boolean))).sort();
+  }, [liveDetail]);
+
+  const programFilteredDetail = useMemo(() => {
+    if (!filteredDetail) return null;
+    if (programFilter.size === 0) return filteredDetail;
+    return filteredDetail.filter(r => r.program && programFilter.has(r.program));
+  }, [filteredDetail, programFilter]);
+
+  const filteredStaffing = useMemo(() => {
+    if (!programFilteredDetail || programFilter.size === 0) return staffing;
+    const reagg = reaggregateStaffing(programFilteredDetail);
+    return reagg ?? staffing;
+  }, [programFilteredDetail, programFilter, staffing]);
 
   // Spinner shown only during initial IndexedDB restore
   if (loading && !isLive && !parsedStaffing) {
@@ -231,6 +251,33 @@ export default function App() {
         ))}
       </div>
 
+      {/* Program filter bar — shown only when live data + program data available */}
+      {isLive && allPrograms.length > 0 && (
+        <div style={{
+          background: "var(--bg-card)",
+          borderBottom: "1px solid var(--border)",
+          padding: "8px 24px",
+          display: "flex", alignItems: "center", gap: 12,
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-b)", textTransform: "uppercase", letterSpacing: 0.5, flexShrink: 0 }}>
+            Program
+          </span>
+          <MultiSelect
+            options={allPrograms}
+            selected={programFilter}
+            onChange={setProgramFilter}
+            placeholder="All programs"
+            label="program"
+          />
+          {programFilter.size > 0 && (
+            <span style={{ fontSize: 12, color: "var(--text-b)" }}>
+              Filtering all tabs to <strong style={{ color: "var(--text-h)" }}>{programFilter.size}</strong> program{programFilter.size > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Main content: sidebar + content */}
       <div style={{ display: "flex", flexDirection: "row", flex: 1, overflow: "hidden", minHeight: 0 }}>
 
@@ -238,7 +285,7 @@ export default function App() {
         <div style={{ width: sidebarWidth, minWidth: 200, maxWidth: 480, flexShrink: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <HomeSidebar
             staffing={staffing}
-            costs={filteredDetail ? computeCosts(filteredDetail) : null}
+            costs={filteredDetail ? computeCosts(programFilteredDetail ?? filteredDetail) : null}
             margin={margin}
             setMargin={setMargin}
             isLive={isLive}
@@ -261,12 +308,12 @@ export default function App() {
           <StaffingTab
             view={view}
             setView={setView}
-            staffing={staffing}
+            staffing={filteredStaffing}
             isLive={isLive}
             loading={loading}
             storedName={storedName}
             storedDate={storedDate}
-            liveDetail={filteredDetail}
+            liveDetail={programFilteredDetail}
             monthLabels={monthLabels}
             margin={margin}
             setMargin={setMargin}
